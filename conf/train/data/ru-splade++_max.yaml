@@ -7,5 +7,5 @@ VALIDATION_SIZE_FOR_LOSS: 20000
 VALIDATION_FULL_RANKING:
   D_COLLECTION_PATH: data/val_retrieval/collection
   Q_COLLECTION_PATH: data/val_retrieval/queries
-  QREL_PATH: data/msmarco/val_retrieval/qrel.json
+  QREL_PATH: data/val_retrieval/qrel.json
   TOP_K: 500
