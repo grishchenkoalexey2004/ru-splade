@@ -1,0 +1,17 @@
+# @package _global_
+
+init_dict:
+  # базовая модель
+  model_type_or_dir: ai-forever/ruBert-base
+  # базовая модель для query
+  model_type_or_dir_q: null
+  freeze_d_model: 0
+  # тип аггрегации (сумма, max и т.д.)
+  agg: max
+  fp16: true
+
+config:
+  tokenizer_type: ai-forever/ruBert-base
+  # тип модели (splade, splade-doc и т.д.)
+  matching_type: splade
+
