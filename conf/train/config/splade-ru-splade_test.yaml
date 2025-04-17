@@ -14,7 +14,7 @@ record_frequency: 3
 train_monitoring_freq: 2
 warmup_steps: 5
 max_length: 10
-fp16: false
+fp16: true
 augment_pairs: in_batch_negatives
 matching_type: splade
 monitoring_ckpt: loss  # or e.g. MRR@10

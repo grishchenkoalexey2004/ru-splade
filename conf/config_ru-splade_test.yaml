@@ -3,20 +3,20 @@ defaults:  # (these specify which config FILES to use)
   ############## TRAIN ###################################
   # конфигурация касающаяся процесса обучения (lr, batch_size, iterations и т.д.)
   #! все считанные поля и значения добавляются в раздел config (см внизу файла)
-  - train/config: splade_ru-splade_toy
+  - train/config: splade-ru-splade_test
   # конфигурация касающаяся данных (тип данных, пути и так далее)
-  - train/data: toy 
+  - train/data: ru-splade_test 
   # конфигурация касающася модели (типы трансформеров и так далее)
   - train/model: ru-splade
   ############## INDEX ###################################
   # путь к коллекции 
-  - index: toy
+  # - index: ru-splade_test
   ############## RETRIEVE ################################
   # откуда взять для evaluate, по каким метрикам производить evaluate и т.д.
-  - retrieve_evaluate: toy
+  # - retrieve_evaluate: toy
   ############### FLOPS ##################################
   # для подсчета метрики flops (путь)
-  - flops: toy
+  # - flops: toy
 
 # Direct PARAMETER setting
 # подтягивает при запуске
@@ -24,4 +24,4 @@ config:  # to be provided for each run
   checkpoint_dir: ???
   index_dir: ???
   out_dir: ???
-  fp16: false #
+  fp16: true #

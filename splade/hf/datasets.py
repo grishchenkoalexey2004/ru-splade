@@ -8,6 +8,8 @@ from tqdm.auto import tqdm
 import random
 
 
+
+
 class DatasetPreLoad():
     """
     dataset to iterate over a document/query collection, format per line: format per line: doc_id \t doc

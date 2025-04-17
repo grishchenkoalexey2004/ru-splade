@@ -6,7 +6,7 @@ class L1:
     def __call__(self, batch_rep):
         return torch.sum(torch.abs(batch_rep), dim=-1).mean()
 
-
+# дефолтный регуляризатор 
 class L0:
     """non-differentiable
     """

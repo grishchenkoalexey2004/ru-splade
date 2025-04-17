@@ -11,7 +11,7 @@ we provide abstraction classes from which we can easily derive representation-ba
 with various options (one or two encoders, freezing one encoder etc.) 
 """
 
-
+# обертка под MLM модель (ну или другую модель по желанию)
 class TransformerRep(torch.nn.Module):
 
     def __init__(self, model_type_or_dir, output, fp16=False):
@@ -46,7 +46,7 @@ class TransformerRep(torch.nn.Module):
                 return hidden_states, tokens["attention_mask"]
                 # no pooling, we return all the hidden states (+ the attention mask)
 
-
+# базовый класс для Siamese (обертка для трансформеров под document и query)
 class SiameseBase(torch.nn.Module, ABC):
 
     def __init__(self, model_type_or_dir, output, match="dot_product", model_type_or_dir_q=None, freeze_d_model=False,
@@ -62,19 +62,21 @@ class SiameseBase(torch.nn.Module, ABC):
                                                 output, fp16) if model_type_or_dir_q is not None else None
         assert not (freeze_d_model and model_type_or_dir_q is None)
         self.freeze_d_model = freeze_d_model
+        # заморозка трансформера отвечающего за кодировку документа
         if freeze_d_model:
             self.transformer_rep.requires_grad_(False)
 
-    print()
     def encode(self, kwargs, is_q):
         raise NotImplementedError
 
     def encode_(self, tokens, is_q=False):
+        # кодировка документа или запроса в зависимости от флага is_q 
         transformer = self.transformer_rep
         if is_q and self.transformer_rep_q is not None:
             transformer = self.transformer_rep_q
         return transformer(**tokens)
 
+    # включение/выключение режима обучения модели (для всех имеющихся незамороженных трансформеров)
     def train(self, mode=True):
         if self.transformer_rep_q is None:  # only one model, life is simple
             self.transformer_rep.train(mode)
@@ -93,12 +95,12 @@ class SiameseBase(torch.nn.Module, ABC):
             do_d, do_q = "d_kwargs" in kwargs, "q_kwargs" in kwargs
             if do_d:
                 d_rep = self.encode(kwargs["d_kwargs"], is_q=False)
-                if self.cosine:  # normalize embeddings
+                if self.cosine:  # нормализация векторов
                     d_rep = normalize(d_rep)
                 out.update({"d_rep": d_rep})
             if do_q:
                 q_rep = self.encode(kwargs["q_kwargs"], is_q=True)
-                if self.cosine:  # normalize embeddings
+                if self.cosine:  # нормализация векторов
                     q_rep = normalize(q_rep)
                 out.update({"q_rep": q_rep})
             if do_d and do_q:
@@ -145,6 +147,7 @@ class Splade(SiameseBase):
         self.agg = agg
 
     def encode(self, tokens, is_q):
+        # кодирование с добавлением аггрегации
         out = self.encode_(tokens, is_q)["logits"]  # shape (bs, pad_len, voc_size)
         if self.agg == "sum":
             return torch.sum(torch.log(1 + torch.relu(out)) * tokens["attention_mask"].unsqueeze(-1), dim=1)
@@ -153,7 +156,7 @@ class Splade(SiameseBase):
             return values
             # 0 masking also works with max because all activations are positive
 
-
+# splade-doc - модель кодирующая запрос bag-of-words способом
 class SpladeDoc(SiameseBase):
     """SPLADE without query encoder
     """
@@ -180,6 +183,7 @@ class SpladeDoc(SiameseBase):
 
     def encode(self, tokens, is_q):
         if is_q:
+            # генерация bag-of-words для запроса
             q_bow = generate_bow(tokens["input_ids"], self.output_dim, device=tokens["input_ids"].device)
             q_bow[:, self.pad_id] = 0
             q_bow[:, self.cls_id] = 0
@@ -187,6 +191,7 @@ class SpladeDoc(SiameseBase):
             # other the pad, cls and sep tokens are in bow
             return q_bow
         else:
+            # кодирование документа такое же как и в обычном splade
             out = self.encode_(tokens)["logits"]  # shape (bs, pad_len, voc_size)
             if self.agg == "sum":
                 return torch.sum(torch.log(1 + torch.relu(out)) * tokens["attention_mask"].unsqueeze(-1), dim=1)
@@ -195,7 +200,7 @@ class SpladeDoc(SiameseBase):
                 return values
                 # 0 masking also works with max because all activations are positive
 
-
+# пока не знаю, что это за модель 
 class SpladeTopK(SiameseBase):
     """
     model with topk 
@@ -230,6 +235,7 @@ class SpladeTopK(SiameseBase):
         else:
             return rep
 
+# lexical splade 
 class SpladeLexical(SiameseBase):
     """
     document expansion model with weigthed query

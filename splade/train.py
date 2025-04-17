@@ -8,7 +8,7 @@ from torch.utils import data
 from conf.CONFIG_CHOICE import CONFIG_NAME, CONFIG_PATH
 from .datasets.dataloaders import CollectionDataLoader, SiamesePairsDataLoader, DistilSiamesePairsDataLoader
 from .datasets.datasets import PairsDatasetPreLoad, DistilPairsDatasetPreLoad, MsMarcoHardNegatives, \
-    CollectionDatasetPreLoad
+    CollectionDatasetPreLoad, RussianPairsDatasetPreLoad
 from .losses.regularization import init_regularizer, RegWeightScheduler
 from .models.models_utils import get_model
 from .optim.bert_optim import init_simple_bert_optim
@@ -127,6 +127,9 @@ def train(exp_dict: DictConfig):
         # триплеты
         data_train = PairsDatasetPreLoad(data_dir=exp_dict["data"]["TRAIN_DATA_DIR"])
         train_mode = "triplets"
+    elif exp_dict["data"].get("type", "") == "rus-triplets":
+        data_train = RussianPairsDatasetPreLoad(data_dir=exp_dict["data"]["TRAIN_DATA_DIR"])
+        train_mode = "rus-triplets"
     elif exp_dict["data"].get("type", "") == "triplets_with_distil":
         data_train = DistilPairsDatasetPreLoad(data_dir=exp_dict["data"]["TRAIN_DATA_DIR"])
         train_mode = "triplets_with_distil"
@@ -144,33 +147,56 @@ def train(exp_dict: DictConfig):
     
     # проверка значения loss функции на части триплетов
     if "VALIDATION_SIZE_FOR_LOSS" in exp_dict["data"]:
-        # разбиваем данные, если указано процентное соотношение разбиения
-        print("initialize loader for validation loss")
-        print("split train, originally {} pairs".format(len(data_train)))
-        data_train, data_val = torch.utils.data.random_split(data_train, lengths=[
-            len(data_train) - exp_dict["data"]["VALIDATION_SIZE_FOR_LOSS"],
-            exp_dict["data"]["VALIDATION_SIZE_FOR_LOSS"]])
-        print("train: {} pairs ~~ val: {} pairs".format(len(data_train), len(data_val)))
-        # создание validation части из триплетов
-        if train_mode == "triplets":
-            val_loss_loader = SiamesePairsDataLoader(dataset=data_val, batch_size=config["eval_batch_size"],
-                                                     shuffle=False,
-                                                     num_workers=4,
-                                                     tokenizer_type=config["tokenizer_type"],
-                                                     max_length=config["max_length"], drop_last=drop_last)
-        elif train_mode == "triplets_with_distil":
-            val_loss_loader = DistilSiamesePairsDataLoader(dataset=data_val, batch_size=config["eval_batch_size"],
-                                                           shuffle=False,
-                                                           num_workers=4,
-                                                           tokenizer_type=config["tokenizer_type"],
-                                                           max_length=config["max_length"], drop_last=drop_last)
+
+        if train_mode != "rus-triplets":
+            # разбиваем данные, если указано процентное соотношение разбиения
+            print("initialize loader for validation loss")
+            print("split train, originally {} pairs".format(len(data_train)))
+            data_train, data_val = torch.utils.data.random_split(data_train, lengths=[
+                len(data_train) - exp_dict["data"]["VALIDATION_SIZE_FOR_LOSS"],
+                exp_dict["data"]["VALIDATION_SIZE_FOR_LOSS"]])
+            print("train: {} pairs ~~ val: {} pairs".format(len(data_train), len(data_val)))
+            # создание validation части из триплетов
+            if train_mode == "triplets":
+                val_loss_loader = SiamesePairsDataLoader(dataset=data_val, batch_size=config["eval_batch_size"],
+                                                        shuffle=False,
+                                                        num_workers=4,
+                                                        tokenizer_type=config["tokenizer_type"],
+                                                        max_length=config["max_length"], drop_last=drop_last)
+            
+            elif train_mode == "triplets_with_distil":
+                val_loss_loader = DistilSiamesePairsDataLoader(dataset=data_val, batch_size=config["eval_batch_size"],
+                                                            shuffle=False,
+                                                            num_workers=4,
+                                                            tokenizer_type=config["tokenizer_type"],
+                                                            max_length=config["max_length"], drop_last=drop_last)
+            else:
+                raise NotImplementedError
+            
         else:
-            raise NotImplementedError
+            # для русских триплетов берем заранее обработанный чанк датасета
+            if "VALIDATION_LOSS_DATA_DIR" in exp_dict["data"]:
+                data_val = PairsDatasetPreLoad(data_dir=exp_dict["data"]["VALIDATION_LOSS_DATA_DIR"])
+                val_loss_loader = SiamesePairsDataLoader(dataset=data_val, batch_size=config["eval_batch_size"],
+                                                        shuffle=False,
+                                                        num_workers=4, #! 4 workers поскольку датасет загр. целиком
+                                                        tokenizer_type=config["tokenizer_type"],
+                                                        max_length=config["max_length"], drop_last=drop_last)
+            else:
+                raise ValueError("VALIDATION_LOSS_DATA_DIR is not specified")
+                
 
     
     if train_mode == "triplets":
         train_loader = SiamesePairsDataLoader(dataset=data_train, batch_size=config["train_batch_size"], shuffle=True,
                                               num_workers=4,
+                                              tokenizer_type=config["tokenizer_type"],
+                                              max_length=config["max_length"], drop_last=drop_last)
+    elif train_mode == "rus-triplets":
+        #! one worker only!
+        #! no shuffle!
+        train_loader = SiamesePairsDataLoader(dataset=data_train, batch_size=config["train_batch_size"], shuffle=False, 
+                                              num_workers=1, #! one worker only!
                                               tokenizer_type=config["tokenizer_type"],
                                               max_length=config["max_length"], drop_last=drop_last)
     elif train_mode == "triplets_with_distil":
