@@ -1,14 +1,13 @@
 # @package data
 
-type: rus-triplets
+type: triplets
 
-TRAIN_DATA_DIR: data/msmarco-ru/triplets
+TRAIN_DATA_DIR: data/msmarco-ru/triplets/train/chunk_1.tsv
 
-VALIDATION_SIZE_FOR_LOSS: null
-# file data/msmarco-ru/triplets/train/raw.tsv contains one of 113 chunks of triplets in tsv format (raw.tsv)
-VALIDATION_LOSS_DATA_DIR: data/msmarco-ru/triplets/train
-# VALIDATION_FULL_RANKING:
-#   D_COLLECTION_PATH: data/toy_data/val_collection
-#   Q_COLLECTION_PATH: data/toy_data/val_queries
-#   QREL_PATH: data/toy_data/qrel/qrel.json
-#   TOP_K: 20
+VALIDATION_SIZE_FOR_LOSS: 20
+
+VALIDATION_FULL_RANKING:
+  D_COLLECTION_PATH: data/toy_data/val_collection
+  Q_COLLECTION_PATH: data/toy_data/val_queries
+  QREL_PATH: data/toy_data/qrel/qrel.json
+  TOP_K: 20

@@ -3,52 +3,9 @@ import json
 import os
 import pickle
 import random
-from datasets import load_from_disk
-from torch.utils.data import Dataset, IterableDataset
+from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 
-# для русских троек
-class DictDatasetWrapper:
-    def __init__(self,data_dir:str):
-        self.dataset = load_from_disk(data_dir)
-        self.dataset_iterable = None 
-
-    def __iter__(self):
-        self.dataset_iterable = iter(self.dataset["train"])
-        return self
-    
-    
-    def __next__(self):
-        new_line = next(self.dataset_iterable)
-        return (new_line["query"].strip(),new_line["positive"].strip(),new_line["negative"].strip())
-    
-    def __len__(self):
-        return len(self.dataset["train"])
-    
-
-class RussianPairsDatasetPreLoad(IterableDataset):
-    """
-    dataset to iterate over a collection of pairs, format per line: q \t d_pos \t d_neg
-    we preload everything in memory at init
-    """
-
-    def __init__(self, data_dir):
-        super(RussianPairsDatasetPreLoad, self).__init__()
-
-        self.data_dir = data_dir
-        self.id_style = "row_id"
-        
-        self.dataset = DictDatasetWrapper(data_dir)
-
-        # количество экземпляров    
-        self.nb_ex = len(self.dataset)
-
-    def __iter__(self):
-        return iter(self.dataset)
-
-    # возврат количества экземплятров в файле
-    def __len__(self):
-        return self.nb_ex
 
 # загрузчик триплетов
 class PairsDatasetPreLoad(Dataset):
