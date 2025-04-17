@@ -1,4 +1,5 @@
 import os
+# скрипт ищет путь конфига из переменных окружающей среды
 
 CONFIG_NAME = None
 CONFIG_PATH = "../conf"
@@ -23,3 +24,4 @@ else:
 
 if ".yaml" in CONFIG_NAME:
     CONFIG_NAME = CONFIG_NAME.split(".yaml")[0]
+

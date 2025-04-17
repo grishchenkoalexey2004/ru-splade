@@ -22,6 +22,7 @@ class SparseIndexing(Evaluator):
     def __init__(self, model, config, compute_stats=False, dim_voc=None, is_query=False, force_new=True,**kwargs):
         super().__init__(model, config, **kwargs)
         self.index_dir = config["index_dir"] if config is not None else None
+        # создание объекта инвертированного индекса!
         self.sparse_index = IndexDictOfArray(self.index_dir, dim_voc=dim_voc, force_new=force_new)
         self.compute_stats = compute_stats
         self.is_query = is_query
@@ -68,8 +69,7 @@ class SparseIndexing(Evaluator):
             for key in list(self.sparse_index.index_doc_id.keys()):
                 # convert to numpy
                 self.sparse_index.index_doc_id[key] = np.array(self.sparse_index.index_doc_id[key], dtype=np.int32)
-                self.sparse_index.index_doc_value[key] = np.array(self.sparse_index.index_doc_value[key],
-                                                                  dtype=np.float32)
+                self.sparse_index.index_doc_value[key] = np.array(self.sparse_index.index_doc_value[key], dtype=np.float32)
             out = {"index": self.sparse_index, "ids_mapping": doc_ids}
             if self.compute_stats:
                 out["stats"] = stats
@@ -82,6 +82,7 @@ class SparseRetrieval(Evaluator):
 
     @staticmethod
     def select_topk(filtered_indexes, scores, k):
+        # topk лучших ответов
         if len(filtered_indexes) > k:
             sorted_ = np.argpartition(scores, k)[:k]
             filtered_indexes, scores = filtered_indexes[sorted_], -scores[sorted_]

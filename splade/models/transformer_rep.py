@@ -17,8 +17,9 @@ class TransformerRep(torch.nn.Module):
     def __init__(self, model_type_or_dir, output, fp16=False):
         """
         output indicates which representation(s) to output from transformer ("MLM" for MLM model)
+
         model_type_or_dir is either the name of a pre-trained model (e.g. bert-base-uncased), or the path to
-        directory containing model weights, vocab etc.
+        directory containing model weights, vocab etc!  
         """
         super().__init__()
         assert output in ("mean", "cls", "hidden_states", "MLM"), "provide valid output"
@@ -26,7 +27,7 @@ class TransformerRep(torch.nn.Module):
         self.transformer = model_class.from_pretrained(model_type_or_dir)
         self.tokenizer = AutoTokenizer.from_pretrained(model_type_or_dir)
         self.output = output
-        self.fp16 = fp16
+        self.fp16 = fp16    
 
     def forward(self, **tokens):
         with torch.cuda.amp.autocast() if self.fp16 else NullContextManager():
@@ -64,6 +65,7 @@ class SiameseBase(torch.nn.Module, ABC):
         if freeze_d_model:
             self.transformer_rep.requires_grad_(False)
 
+    print()
     def encode(self, kwargs, is_q):
         raise NotImplementedError
 

@@ -30,6 +30,7 @@ def create_index_dist(index):
 
 @hydra.main(config_path=CONFIG_PATH, config_name=CONFIG_NAME)
 def flops(exp_dict: DictConfig):
+    # считает flops на определённом поднаборе query и documents
     exp_dict, config, init_dict, model_training_config = get_initialize_config(exp_dict)
 
     model = get_model(config, init_dict)

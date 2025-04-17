@@ -8,7 +8,7 @@ from transformers import AutoTokenizer
 
 from ..utils.utils import rename_keys
 
-
+# нужен для определения и инициализации нашего токенизатора!
 class DataLoaderWrapper(DataLoader):
     def __init__(self, tokenizer_type, max_length, **kwargs):
         self.max_length = max_length
@@ -21,33 +21,41 @@ class DataLoaderWrapper(DataLoader):
 
 class SiamesePairsDataLoader(DataLoaderWrapper):
     """Siamese encoding (query and document independent)
-    train mode (pairs)
+    train mode (triplets)
     """
 
     def collate_fn(self, batch):
         """
         batch is a list of tuples, each tuple has 3 (text) items (q, d_pos, d_neg)
         """
+        #q - кортеж запросов 
+        #d_pos - кортеж d_pos
+        #d_neg - кортеж d_neg
         q, d_pos, d_neg = zip(*batch)
+        # обработка + обрезка + padding (нужен для берта!)
         q = self.tokenizer(list(q),
                            add_special_tokens=True,
                            padding="longest",  # pad to max sequence length in batch
                            truncation="longest_first",  # truncates to self.max_length
                            max_length=self.max_length,
                            return_attention_mask=True)
+        
         d_pos = self.tokenizer(list(d_pos),
                                add_special_tokens=True,
                                padding="longest",  # pad to max sequence length in batch
                                truncation="longest_first",  # truncates to self.max_length
                                max_length=self.max_length,
                                return_attention_mask=True)
+        
         d_neg = self.tokenizer(list(d_neg),
                                add_special_tokens=True,
                                padding="longest",  # pad to max sequence length in batch
                                truncation="longest_first",  # truncates to self.max_length
                                max_length=self.max_length,
                                return_attention_mask=True)
-        sample = {**rename_keys(q, "q"), **rename_keys(d_pos, "pos"), **rename_keys(d_neg, "neg")}
+        
+        # переименование ключей (добавление префикса ко всему, что возвращает токенизатор)
+        sample = {**rename_keys(q, "q"), **rename_keys(d_pos, "pos"), **rename_keys(d_neg, "neg")} # множество словарей
         return {k: torch.tensor(v) for k, v in sample.items()}
 
 
@@ -86,6 +94,7 @@ class CollectionDataLoader(DataLoaderWrapper):
     """
     """
 
+    # такая же предобработка, что и при обучении трансформера (tokenization, padding и тд)
     def collate_fn(self, batch):
         """
         batch is a list of tuples, each tuple has 2 (text) items (id_, doc)

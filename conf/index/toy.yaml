@@ -1,4 +1,5 @@
 # @package _global_
 
+# путь уже не триплетам а к полноценной коллекции документов
 data:
   COLLECTION_PATH: data/toy_data/full_collection

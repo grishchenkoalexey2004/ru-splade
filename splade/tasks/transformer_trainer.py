@@ -55,6 +55,7 @@ class TransformerTrainer(TrainerIter):
             try:
                 batch = next(self.train_iterator)
             except StopIteration:
+                # заново просматриваем датасет!
                 # when nb_iterations > len(data_loader)
                 self.train_iterator = iter(self.train_loader)
                 batch = next(self.train_iterator)

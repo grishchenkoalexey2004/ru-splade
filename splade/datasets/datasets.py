@@ -7,7 +7,7 @@ import random
 from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 
-
+# загрузчик триплетов
 class PairsDatasetPreLoad(Dataset):
     """
     dataset to iterate over a collection of pairs, format per line: q \t d_pos \t d_neg
@@ -17,7 +17,8 @@ class PairsDatasetPreLoad(Dataset):
     def __init__(self, data_dir):
         self.data_dir = data_dir
         self.id_style = "row_id"
-
+        
+        # словарь номер_строки -> (query, doc_pos, doc_neg)
         self.data_dict = {}  # => dict that maps the id to the line offset (position of pointer in the file)
         print("Preloading dataset")
         self.data_dir = os.path.join(self.data_dir, "raw.tsv")
@@ -26,11 +27,15 @@ class PairsDatasetPreLoad(Dataset):
                 if len(line) > 1:
                     query, pos, neg = line.split("\t")  # first column is id
                     self.data_dict[i] = (query.strip(), pos.strip(), neg.strip())
+
+        # количество экземпляров    
         self.nb_ex = len(self.data_dict)
 
+    # возврат количества экземплятров в файле
     def __len__(self):
         return self.nb_ex
 
+    # возврат 
     def __getitem__(self, idx):
         return self.data_dict[idx]
 
@@ -80,19 +85,26 @@ class CollectionDatasetPreLoad(Dataset):
             for i, line in enumerate(tqdm(reader)):
                 if len(line) > 1:
                     id_, *data = line.split("\t")  # first column is id
+                    # убирает табуляции и \n из текстов документов
                     data = " ".join(" ".join(data).splitlines())
+                    # нумерация пар по номеру строки
                     if self.id_style == "row_id":
-                        self.data_dict[i] = data
-                        self.line_dict[i] = id_.strip()
+                        self.data_dict[i] = data # словарь номер_строки -> информация
+                        self.line_dict[i] = id_.strip() # словарь номер строки -> _id query в триплете
                     else:
+                        # нумерация по id запроса
                         self.data_dict[id_] = data.strip()
+
+        # длина датасета
         self.nb_ex = len(self.data_dict)
 
     def __len__(self):
         return self.nb_ex
 
+    # получение доступа к элементам датасета через номер строки (id_style = row_id) или qid 
     def __getitem__(self, idx):
         if self.id_style == "row_id":
+            # за счёт номера строки получаем qid, и документы
             return self.line_dict[idx], self.data_dict[idx]
         else:
             return str(idx), self.data_dict[str(idx)]

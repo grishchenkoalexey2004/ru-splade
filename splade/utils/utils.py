@@ -149,24 +149,32 @@ def get_dataset_name(path):
     else:
         return "other_dataset"
 
-
+# разделяет конфигурационный файл на сегменты
 def get_initialize_config(exp_dict: DictConfig, train=False):
     # delay import to reduce dependencies
     from ..utils.hydra import hydra_chdir
     hydra_chdir(exp_dict)
+    # перезаписываем fp16 в init_dict
     exp_dict["init_dict"]["fp16"] = exp_dict["config"].get("fp16", False)
     config = exp_dict["config"]
+    # конфигурация касающаяся модели 
     init_dict = exp_dict["init_dict"]
+
+
     if train:
+        # считаем, что конфиг для нашей модели имеется
+        # создаем папку сохранения чекпоинта и всего, что касается обучения модели 
         os.makedirs(exp_dict.config.checkpoint_dir, exist_ok=True)
         OmegaConf.save(config=exp_dict, f=os.path.join(exp_dict.config.checkpoint_dir, "config.yaml"))
         model_training_config = None
     else:
+        # если нет configа для trained модели
         if config.pretrained_no_yamlconfig:
             model_training_config = config
         else:
             model_training_config = OmegaConf.load(os.path.join(config["checkpoint_dir"], "config.yaml"))["config"]
 
+        # пока хз, что это
         #if HF: need to update config (except for adapters...).
         #if not "adapter_name" in config and "hf_training" in config:
         if  "hf_training" in config:
@@ -175,23 +183,30 @@ def get_initialize_config(exp_dict: DictConfig, train=False):
                    
     return exp_dict, config, init_dict, model_training_config
 
-
+# возвращает объект лосса в зависимости от типа лосса 
 def get_loss(config):
+    # парный лосс (для positive и negative) document (NLL) - negative log likelihood
     if config["loss"] == "PairwiseNLL":
         loss = PairwiseNLL()
+
+    # для дистиляций
     elif config["loss"] == "DistilMarginMSE":
         loss = DistilMarginMSE()
     elif config["loss"] == "KlDiv":
         loss = DistilKLLoss()
+
+    # лосс с 1-им positive и остальными negative внутри батча
     elif config["loss"] == "InBatchPairwiseNLL":
         loss = InBatchPairwiseNLL()
+    
+    # хз, что это 
     elif config["loss"] == "BCE":
         loss = BCEWithLogitsLoss()
     else:
         raise NotImplementedError("provide valid loss")
     return loss
 
-
+# берет random_seed из config или задает свой, равный 123
 def set_seed_from_config(config):
     if "random_seed" in config:
         random_seed = config["random_seed"]

@@ -19,18 +19,22 @@ from .utils.utils import set_seed, restore_model, get_initialize_config, get_los
 
 @hydra.main(config_path=CONFIG_PATH, config_name=CONFIG_NAME, version_base="1.2")
 def train(exp_dict: DictConfig):
+    # разделение конфига
     exp_dict, config, init_dict, _ = get_initialize_config(exp_dict, train=True)
+    # возвращает объект модели 
     model = get_model(config, init_dict)
     random_seed = set_seed_from_config(config)
 
+    # создание оптимизатора и планировщика по модели и конфигу параметров обучения
     optimizer, scheduler = init_simple_bert_optim(model, lr=config["lr"], warmup_steps=config["warmup_steps"],
                                                   weight_decay=config["weight_decay"],
                                                   num_training_steps=config["nb_iterations"])
 
+    # перенос модели на cpu/gpu
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     ################################################################
-    # CHECK IF RESUME TRAINING
+    # Проверка на продолжение обучение 
     ################################################################
     iterations = (1, config["nb_iterations"] + 1)  # tuple with START and END
     regularizer = None
@@ -38,13 +42,18 @@ def train(exp_dict: DictConfig):
         print("@@@@ RESUMING TRAINING @@@")
         print("WARNING: change seed to change data order when restoring !")
         set_seed(random_seed + 666)
+        # загрузка весов на cpu/gpu
         if device == torch.device("cuda"):
             ckpt = torch.load(os.path.join(config["checkpoint_dir"], "model_ckpt/model_last.tar"))
         else:
             ckpt = torch.load(os.path.join(config["checkpoint_dir"], "model_ckpt/model_last.tar"), map_location=device)
+        
+        # продолжение обучения
         print("starting from step", ckpt["step"])
         print("{} remaining iterations".format(iterations[1] - ckpt["step"]))
         iterations = (ckpt["step"] + 1, config["nb_iterations"])
+
+        # восстановление модели и оптимизатора из ckpt
         restore_model(model, ckpt["model_state_dict"])
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
         if device == torch.device("cuda"):
@@ -53,32 +62,47 @@ def train(exp_dict: DictConfig):
                     if torch.is_tensor(v):
                         state[k] = v.cuda()
         scheduler.load_state_dict(ckpt["scheduler_state_dict"])
+
         if "regularizer" in ckpt:
             print("loading regularizer")
             regularizer = ckpt.get("regularizer", None)
 
+    # параллелизация
     if torch.cuda.device_count() > 1:
         print(" --- use {} GPUs --- ".format(torch.cuda.device_count()))
         model = torch.nn.DataParallel(model)
     model.to(device)
 
+    # загрузка функции потерь
     loss = get_loss(config)
 
     # initialize regularizer dict
-    if "regularizer" in config and regularizer is None:  # else regularizer is loaded
+    if "regularizer" in config and regularizer is None:  # если не загрузили regularizer из ckpt
         output_dim = model.module.output_dim if hasattr(model, "module") else model.output_dim
         regularizer = {"eval": {"L0": {"loss": init_regularizer("L0")},
-                                "sparsity_ratio": {"loss": init_regularizer("sparsity_ratio",
+                                "sparsity_ratio": {"loss": init_regularizer("sparsity_ratio", # зачем это?
                                                                             output_dim=output_dim)}},
                        "train": {}}
         if config["regularizer"] == "eval_only":
             # just in the case we train a model without reg but still want the eval metrics like L0
             pass
         else:
+            # узнаем какой регуляризатор нужно инициализировать 
+            # там может стоять например это:
+            # regularizer:
+            #     FLOPS:
+            #         lambda_q: 0.0005
+            #         lambda_d: 0.0003
+            #         T: 3
+            #         targeted_rep: rep
+            #         reg: FLOPS
             for reg in config["regularizer"]:
+                # targeted_rep - показывает, какое представление вывода модели ограничивать (если их несколько)
                 temp = {"loss": init_regularizer(config["regularizer"][reg]["reg"]),
                         "targeted_rep": config["regularizer"][reg]["targeted_rep"]}
                 d_ = {}
+
+                # T - временная отметка до которой идет квадратичный прирост 
                 if "lambda_q" in config["regularizer"][reg]:
                     d_["lambda_q"] = RegWeightScheduler(config["regularizer"][reg]["lambda_q"],
                                                         config["regularizer"][reg]["T"])
@@ -92,13 +116,15 @@ def train(exp_dict: DictConfig):
                 # the common case: model outputs "rep" (in forward) and this should be the value for this targeted_rep
                 regularizer["train"][reg] = temp
 
-    # fix for current in batch neg losses that break on last batch
+    # сбрасываем последний батч, т.к. он выдает ошибку в функции потерь
     if config["loss"] in ("InBatchNegHingeLoss", "InBatchPairwiseNLL"):
         drop_last = True
     else:
         drop_last = False
 
+    # инициализация загрузчиков данных (зависит от типа данных, взятых для обучения)
     if exp_dict["data"].get("type", "") == "triplets":
+        # триплеты
         data_train = PairsDatasetPreLoad(data_dir=exp_dict["data"]["TRAIN_DATA_DIR"])
         train_mode = "triplets"
     elif exp_dict["data"].get("type", "") == "triplets_with_distil":
@@ -115,13 +141,17 @@ def train(exp_dict: DictConfig):
         raise ValueError("provide valid data type for training")
 
     val_loss_loader = None  # default
+    
+    # проверка значения loss функции на части триплетов
     if "VALIDATION_SIZE_FOR_LOSS" in exp_dict["data"]:
+        # разбиваем данные, если указано процентное соотношение разбиения
         print("initialize loader for validation loss")
         print("split train, originally {} pairs".format(len(data_train)))
         data_train, data_val = torch.utils.data.random_split(data_train, lengths=[
             len(data_train) - exp_dict["data"]["VALIDATION_SIZE_FOR_LOSS"],
             exp_dict["data"]["VALIDATION_SIZE_FOR_LOSS"]])
         print("train: {} pairs ~~ val: {} pairs".format(len(data_train), len(data_val)))
+        # создание validation части из триплетов
         if train_mode == "triplets":
             val_loss_loader = SiamesePairsDataLoader(dataset=data_val, batch_size=config["eval_batch_size"],
                                                      shuffle=False,
@@ -137,6 +167,7 @@ def train(exp_dict: DictConfig):
         else:
             raise NotImplementedError
 
+    
     if train_mode == "triplets":
         train_loader = SiamesePairsDataLoader(dataset=data_train, batch_size=config["train_batch_size"], shuffle=True,
                                               num_workers=4,
@@ -151,6 +182,7 @@ def train(exp_dict: DictConfig):
     else:
         raise NotImplementedError
 
+    # проверка метрики на валидации 
     val_evaluator = None
     if "VALIDATION_FULL_RANKING" in exp_dict["data"]:
         with open_dict(config):
@@ -182,6 +214,7 @@ def train(exp_dict: DictConfig):
     # # TRAIN
     # #################################################################
     print("+++++ BEGIN TRAINING +++++")
+    # обучатель трансформаера
     trainer = SiameseTransformerTrainer(model=model, iterations=iterations, loss=loss, optimizer=optimizer,
                                         config=config, scheduler=scheduler,
                                         train_loader=train_loader, validation_loss_loader=val_loss_loader,

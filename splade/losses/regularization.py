@@ -14,7 +14,7 @@ class L0:
     def __call__(self, batch_rep):
         return torch.count_nonzero(batch_rep, dim=-1).float().mean()
 
-
+# flops - регуляризатор
 class FLOPS:
     """constraint from Minimizing FLOPs to Learn Efficient Sparse Representations
     https://arxiv.org/abs/2004.05665
@@ -23,7 +23,7 @@ class FLOPS:
     def __call__(self, batch_rep):
         return torch.sum(torch.mean(torch.abs(batch_rep), dim=0) ** 2)
 
-
+# планировщик для регуляризатора
 class RegWeightScheduler:
     """same scheduling as in: Minimizing FLOPs to Learn Efficient Sparse Representations
     https://arxiv.org/abs/2004.05665
@@ -59,7 +59,7 @@ class SparsityRatio:
     def __call__(self, batch_rep):
         return 1 - torch.sum(batch_rep != 0, dim=-1).float().mean() / self.output_dim
 
-
+# загрузка регуляризатора
 def init_regularizer(reg, **kwargs):
     if reg == "L0":
         return L0()
