@@ -5,8 +5,8 @@ weight_decay: 0.01
 validation_metrics: [ MRR@10, recall@100, recall@200, recall@500 ]
 pretrained_no_yamlconfig: false
 nb_iterations: 20
-train_batch_size: 2  # number of gpus needs to divide this
-eval_batch_size: 600
+train_batch_size: 12  # number of gpus needs to divide this
+eval_batch_size: 12
 index_retrieve_batch_size: 500
 record_frequency: 10000
 train_monitoring_freq: 500
