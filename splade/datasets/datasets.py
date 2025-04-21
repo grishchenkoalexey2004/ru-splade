@@ -17,7 +17,7 @@ class PairsDatasetPreLoad(Dataset):
     def __init__(self, data_dir):
         self.data_dir = data_dir
         self.id_style = "row_id"
-        
+        self.deleted_count = 0 
         # словарь номер_строки -> (query, doc_pos, doc_neg)
         self.data_dict = {}  # => dict that maps the id to the line offset (position of pointer in the file)
         print("Preloading dataset")
@@ -26,10 +26,14 @@ class PairsDatasetPreLoad(Dataset):
             for i, line in enumerate(tqdm(reader)):
                 if len(line) > 1:
                     query, pos, neg = line.split("\t")  # first column is id
-                    self.data_dict[i] = (query.strip(), pos.strip(), neg.strip())
+                    if "Â" in query or "Â" in pos or "Â" in neg: 
+                        self.deleted_count += 1
+                    else:
+                        self.data_dict[i] = (query.strip(), pos.strip(), neg.strip())
 
         # количество экземпляров    
         self.nb_ex = len(self.data_dict)
+        print(f"Удалено дефектных триплетов: {self.deleted_count}")
 
     # возврат количества экземплятров в файле
     def __len__(self):
@@ -66,7 +70,7 @@ class DistilPairsDatasetPreLoad(Dataset):
     def __getitem__(self, idx):
         return self.data_dict[idx]
 
-
+# загрузка документов или query 
 class CollectionDatasetPreLoad(Dataset):
     """
     dataset to iterate over a document/query collection, format per line: format per line: doc_id \t doc
@@ -78,6 +82,7 @@ class CollectionDatasetPreLoad(Dataset):
         assert id_style in ("row_id", "content_id"), "provide valid id_style"
         # id_style indicates how we access the doc/q (row id or doc/q id)
         self.id_style = id_style
+        self.deleted_count = 0
         self.data_dict = {}
         self.line_dict = {}
         print("Preloading dataset")
@@ -87,16 +92,22 @@ class CollectionDatasetPreLoad(Dataset):
                     id_, *data = line.split("\t")  # first column is id
                     # убирает табуляции и \n из текстов документов
                     data = " ".join(" ".join(data).splitlines())
-                    # нумерация пар по номеру строки
-                    if self.id_style == "row_id":
-                        self.data_dict[i] = data # словарь номер_строки -> информация
-                        self.line_dict[i] = id_.strip() # словарь номер строки -> _id query в триплете
+                    # удаляем дефектные строки 
+                    if "Â" in data:
+                        self.deleted_count += 1
                     else:
-                        # нумерация по id запроса
-                        self.data_dict[id_] = data.strip()
+                        # если строка не дефектная, то добавляем в словарь 
+                        # нумерация пар по номеру строки
+                        if self.id_style == "row_id":
+                            self.data_dict[i] = data # словарь номер_строки -> информация
+                            self.line_dict[i] = id_.strip() # словарь номер строки -> _id query в триплете
+                        else:
+                            # нумерация по id запроса
+                            self.data_dict[id_] = data.strip()
 
         # длина датасета
         self.nb_ex = len(self.data_dict)
+        print(f"Удалено дефектных документов: {self.deleted_count}")
 
     def __len__(self):
         return self.nb_ex
@@ -245,3 +256,12 @@ class IR_Dataset_NoLoad(Dataset):
             except:
                 text = value.text
         return idx, text
+
+
+if __name__ == "__main__":
+    pairs_dataset = PairsDatasetPreLoad("test-data-triplets")
+    print(pairs_dataset.data_dict)
+
+
+    collection_dataset = CollectionDatasetPreLoad("test-data-collection", id_style="row_id")
+    print(collection_dataset.data_dict)

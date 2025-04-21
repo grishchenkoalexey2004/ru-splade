@@ -29,7 +29,8 @@ def concat_tsv_files(input_files,chunk_number):
             for tsv_file in input_files:
                 with open(tsv_file, "r", encoding="utf-8") as infile:
                     outfile.write(infile.read())
-
+                    
+            # removing file that was used in concatenation! 
             os.remove(tsv_file)
             
     print(f"Combined {len(input_files)} TSV files into {os.path.abspath(output_file)}")
@@ -76,13 +77,6 @@ if __name__ == "__main__":
 
     concat_tsv_files(converted_files,chunk_number)
 
-
-    print("Removing individual TSV files after concatenation")
-    # Remove individual TSV files after concatenation
-    for tsv_file in converted_files:
-        os.remove(tsv_file)
-        print(f"Removed {os.path.abspath(tsv_file)}")
-    print("Done")
 
     print("Removing concatenated tsv file")
     os.remove(f"msmarco-ru/triplets/train/chunk_{chunk_number}.tsv")
