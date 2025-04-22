@@ -72,4 +72,3 @@ init_dict:
   freeze_d_model: 0
   agg: max
   fp16: false
-  output: Modern_MLM

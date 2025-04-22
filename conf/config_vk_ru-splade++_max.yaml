@@ -26,6 +26,3 @@ config:
   index_dir: models/vk_ru-splade++_max/index
   out_dir: models/vk_ru-splade++_max/out
 
-
-init_dict:
-  output: "Modern_MLM"
