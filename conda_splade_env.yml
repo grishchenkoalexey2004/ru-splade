@@ -351,6 +351,3 @@
   - pip:
     - hydra-core==1.2.0
     - pytrec_eval==0.5
-    - torch==2.6.0
-    - torchaudio==2.6.0
-    - torchvision==0.21.0
