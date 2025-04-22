@@ -17,8 +17,8 @@ config:
   augment_pair: in_batch_negatives
   regularizer:
     FLOPS:
-      lambda_q: 0.0003
-      lambda_d: 0.0000
+      lambda_q: 0.0000
+      lambda_d: 0.0001
       T: 50000
       targeted_rep: rep
       reg: FLOPS
