@@ -26,9 +26,9 @@ class TransformerRep(torch.nn.Module):
         if output == "Modern_MLM":
             model_class = AutoModelForMaskedLM
         elif output == "MLM":
-            model_class = AutoModel
-        else:
             model_class = AutoModelForMaskedLM
+        else:
+            model_class = AutoModel
             
     
         self.transformer = model_class.from_pretrained(model_type_or_dir)
@@ -40,7 +40,7 @@ class TransformerRep(torch.nn.Module):
         with torch.cuda.amp.autocast() if self.fp16 else NullContextManager():
             # tokens: output of HF tokenizer
             out = self.transformer(**tokens)
-            if self.output == "MLM":
+            if self.output == "MLM" or self.output == "Modern_MLM":
                 return out
             hidden_states = self.transformer(**tokens)[0]
             # => forward from AutoModel returns a tuple, first element is hidden states, shape (bs, seq_len, hidden_dim)
@@ -78,6 +78,7 @@ class SiameseBase(torch.nn.Module, ABC):
 
     def encode_(self, tokens, is_q=False):
         # кодировка документа или запроса в зависимости от флага is_q 
+        # если у трансформера нет отдальнего rep для q, то используется тот же rep что и для d
         transformer = self.transformer_rep
         if is_q and self.transformer_rep_q is not None:
             transformer = self.transformer_rep_q

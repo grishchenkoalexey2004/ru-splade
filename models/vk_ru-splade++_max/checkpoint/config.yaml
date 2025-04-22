@@ -53,7 +53,7 @@ config:
 data:
   type: triplets
   TRAIN_DATA_DIR: data/triplets
-  VALIDATION_SIZE_FOR_LOSS: 20000
+  VALIDATION_SIZE_FOR_LOSS: 10
   COLLECTION_PATH: data/msmarco/full_collection
   Q_COLLECTION_PATH:
   - data/msmarco/dev_queries
