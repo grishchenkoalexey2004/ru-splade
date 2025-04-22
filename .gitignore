@@ -8,4 +8,5 @@ output/
 outputs/*
 experiments/
 data/msmarco-ru
-models/
+models
+data/triplets
