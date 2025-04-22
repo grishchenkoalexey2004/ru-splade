@@ -23,20 +23,15 @@ class TransformerRep(torch.nn.Module):
         """
         super().__init__()
         assert output in ("mean", "cls", "hidden_states", "MLM","Modern_MLM"), "provide valid output"
-        flash_attention_2 = False
         if output == "Modern_MLM":
             model_class = AutoModelForMaskedLM
-            flash_attention_2 = True 
         elif output == "MLM":
             model_class = AutoModel
         else:
             model_class = AutoModelForMaskedLM
             
-        if flash_attention_2:
-            self.transformer = model_class.from_pretrained(model_type_or_dir, attn_implementation="flash_attention_2")
-        else:
-            self.transformer = model_class.from_pretrained(model_type_or_dir)
-
+    
+        self.transformer = model_class.from_pretrained(model_type_or_dir)
         self.tokenizer = AutoTokenizer.from_pretrained(model_type_or_dir)
         self.output = output
         self.fp16 = fp16    

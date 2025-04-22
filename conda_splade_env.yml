@@ -1,3 +1,9 @@
+name: splade
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=3_kmp_llvm
   - absl-py=2.2.0=pyhd8ed1ab_0
@@ -351,3 +357,4 @@
   - pip:
     - hydra-core==1.2.0
     - pytrec_eval==0.5
+
