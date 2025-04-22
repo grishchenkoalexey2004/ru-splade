@@ -1,7 +1,7 @@
 # FILES
 defaults: # (these specify which config FILES to use)
   ############## TRAIN ###################################
-  - train/config: ru-splade++_max_smallbatch
+  - train/config: ru-splade++_max
   - train/data: ru-splade++_max
   - train/model: small_vk_ru-splade++_max # only model changes, config remains the same!
   ############## INDEX ###################################
