@@ -22,7 +22,7 @@ class TransformerRep(torch.nn.Module):
         directory containing model weights, vocab etc!  
         """
         super().__init__()
-        assert output in ("mean", "cls", "hidden_states", "MLM"), "provide valid output"
+        assert output in ("mean", "cls", "hidden_states", "MLM","Modern_MLM"), "provide valid output"
         flash_attention_2 = False
         if output == "Modern_MLM":
             model_class = AutoModelForMaskedLM
@@ -36,7 +36,7 @@ class TransformerRep(torch.nn.Module):
             self.transformer = model_class.from_pretrained(model_type_or_dir, attn_implementation="flash_attention_2")
         else:
             self.transformer = model_class.from_pretrained(model_type_or_dir)
-            
+
         self.tokenizer = AutoTokenizer.from_pretrained(model_type_or_dir)
         self.output = output
         self.fp16 = fp16    
@@ -147,9 +147,9 @@ class Splade(SiameseBase):
     """SPLADE model
     """
 
-    def __init__(self, model_type_or_dir, model_type_or_dir_q=None, freeze_d_model=False, agg="max", fp16=True):
+    def __init__(self, model_type_or_dir, model_type_or_dir_q=None, freeze_d_model=False, agg="max", fp16=True, output="MLM"):
         super().__init__(model_type_or_dir=model_type_or_dir,
-                         output="MLM",
+                         output=output,
                          match="dot_product",
                          model_type_or_dir_q=model_type_or_dir_q,
                          freeze_d_model=freeze_d_model,
