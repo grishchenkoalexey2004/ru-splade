@@ -1,5 +1,5 @@
-mkdir -p data
-cd data
+mkdir -p data/triplets
+cd data/triplets
 
 wget -q https://huggingface.co/datasets/lesha-grishchenko/russian-ranking-triples/resolve/main/chunk_1.tsv.gz
 
