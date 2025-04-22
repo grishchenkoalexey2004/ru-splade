@@ -2,7 +2,7 @@
 
 init_dict:
   # базовая модель
-  model_type_or_dir: 
+  model_type_or_dir: deepvk/RuModernBERT-base
   # базовая модель для query
   model_type_or_dir_q: null
   freeze_d_model: 0
@@ -11,7 +11,7 @@ init_dict:
   fp16: false
 
 config:
-  tokenizer_type: ai-forever/ruBert-base
+  tokenizer_type: deepvk/RuModernBERT-base
   # тип модели (splade, splade-doc и т.д.)
   matching_type: splade
 
