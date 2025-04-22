@@ -131,7 +131,8 @@ class TransformerTrainer(TrainerIter):
                     for monitor_loss in monitor_losses:
                         self.writer.add_scalar("batch_{}".format(monitor_loss),
                                                monitor_losses[monitor_loss].item(), i)
-            # various metrics we save:
+                        
+            # various metrics we save: (валидация loss-функции на отложенной выборке)
             if i % self.record_frequency == 0:
                 if self.validation or (self.test_loader is not None):
                     self.model.eval()
