@@ -52,8 +52,10 @@ class BaseTrainer:
         self.writer = SummaryWriter(self.writer_dir)
         self.config = config
         print(" === trainer config === \n =========================", self.config)
+        # проверка на наличие валидации в каком-либо виде
         self.validation = True if (self.validation_loss_loader is not None
                                    or self.validation_evaluator is not None) else False
+        
         if self.validation:
             # initialize early stopping or saver (if no early stopping):
             if "early_stopping" in self.config:
