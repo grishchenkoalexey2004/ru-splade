@@ -44,9 +44,9 @@ def train(exp_dict: DictConfig):
         set_seed(random_seed + 666)
         # загрузка весов на cpu/gpu
         if device == torch.device("cuda"):
-            ckpt = torch.load(os.path.join(config["checkpoint_dir"], "model_ckpt/model_last.tar"))
+            ckpt = torch.load(os.path.join(config["checkpoint_dir"], "model_ckpt/model_last.tar"),weights_only=False)
         else:
-            ckpt = torch.load(os.path.join(config["checkpoint_dir"], "model_ckpt/model_last.tar"), map_location=device)
+            ckpt = torch.load(os.path.join(config["checkpoint_dir"], "model_ckpt/model_last.tar"), map_location=device, weights_only=False)
         
         # продолжение обучения
         print("starting from step", ckpt["step"])
