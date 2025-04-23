@@ -126,7 +126,7 @@ class BaseTrainer:
             if is_best:
                 torch.save(state, os.path.join(self.checkpoint_dir, "model/model.tar"))
             # remove oldest checkpoint (by default only keep the last 3):
-            remove_old_ckpt(os.path.join(self.checkpoint_dir, "model_ckpt"), k=3)
+            remove_old_ckpt(os.path.join(self.checkpoint_dir, "model_ckpt"), k=2)
         else:
             torch.save(state, os.path.join(self.checkpoint_dir, "model_ckpt/model_final_checkpoint.tar"))
             if self.overwrite_final:

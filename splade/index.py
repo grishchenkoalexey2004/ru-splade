@@ -26,7 +26,7 @@ def index(exp_dict: DictConfig):
     # для toy collection_path хранится в папке conf/index
     d_collection = CollectionDatasetPreLoad(data_dir=exp_dict["data"]["COLLECTION_PATH"], id_style="row_id")
 
-    # такая же предобработка что и при обучении 
+    # загрузка коллекции с документами 
     d_loader = CollectionDataLoader(dataset=d_collection, tokenizer_type=model_training_config["tokenizer_type"],
                                     max_length=model_training_config["max_length"],
                                     batch_size=config["index_retrieve_batch_size"],

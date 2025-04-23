@@ -19,7 +19,7 @@ config:
     FLOPS:
       lambda_q: 0.0000
       lambda_d: 0.0001
-      T: 50000
+      T: 35000
       targeted_rep: rep
       reg: FLOPS
   checkpoint_dir: models/vk_ru-splade-doc_max/checkpoint
