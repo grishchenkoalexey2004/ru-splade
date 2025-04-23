@@ -1,7 +1,7 @@
 # @package config
 
 lr: 2e-5
-seed: 123
+random_seed: 456
 gradient_accumulation_steps: 1
 weight_decay: 0.01
 validation_metrics: [ MRR@10, recall@100, recall@200, recall@500 ]
