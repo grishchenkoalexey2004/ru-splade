@@ -53,7 +53,7 @@ def train(exp_dict: DictConfig):
         print("{} remaining iterations".format(iterations[1] - ckpt["step"]))
         iterations = (ckpt["step"] + 1, config["nb_iterations"])
 
-        # восстановление модели и оптимизатора из ckpt
+        # восстановление модели и оптимизатора из ckpt (т.е не новую модель с hf загружаем, а продолжаем обучение уже хранящейся в ckpt модели)
         restore_model(model, ckpt["model_state_dict"])
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
         if device == torch.device("cuda"):

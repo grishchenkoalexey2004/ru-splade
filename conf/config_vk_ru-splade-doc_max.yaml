@@ -2,7 +2,7 @@
 defaults: # (these specify which config FILES to use)
   ############## TRAIN ###################################
   - train/config: ru-splade_doc
-  - train/data: ru-splade++_max
+  - train/data: ru-splade
   - train/model: vk_ru-splade-doc_max
   ############## INDEX ###################################
   - index: msmarco

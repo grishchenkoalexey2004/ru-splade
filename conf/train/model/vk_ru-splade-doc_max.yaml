@@ -8,7 +8,7 @@ init_dict:
   freeze_d_model: 0
   # тип аггрегации (сумма, max и т.д.)
   agg: max
-  fp16: false
+  fp16: true
 
 config:
   tokenizer_type: deepvk/RuModernBERT-base

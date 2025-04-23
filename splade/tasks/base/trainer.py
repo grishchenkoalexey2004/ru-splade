@@ -114,9 +114,10 @@ class BaseTrainer:
             scheduler_state_dict = self.scheduler.state_dict()
             state["scheduler_state_dict"] = scheduler_state_dict
         if not final_checkpoint:
-            # rename last:
+            # переименовываем последнюю сохраненную модель, сохраняем новый чекпоинт под названием model_last.tar
+            # в model_tar хранится лучшая модель (ну или последняя, если overwrite_final = True)
             if os.path.exists(os.path.join(self.checkpoint_dir, "model_ckpt/model_last.tar")):
-                last_config = torch.load(os.path.join(self.checkpoint_dir, "model_ckpt/model_last.tar"))
+                last_config = torch.load(os.path.join(self.checkpoint_dir, "model_ckpt/model_last.tar"),weights_only=False)
                 step_last_config = last_config["step"]
                 os.rename(os.path.join(self.checkpoint_dir, "model_ckpt/model_last.tar"),
                           os.path.join(self.checkpoint_dir, "model_ckpt/model_ckpt_{}.tar".format(step_last_config)))

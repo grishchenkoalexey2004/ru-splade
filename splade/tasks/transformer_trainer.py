@@ -262,6 +262,7 @@ class SiameseTransformerTrainer(TransformerTrainer):
                 out_d["val_FULL_{}".format(k)] = v
         return out_d
 
+    # сохранение модели
     def save_checkpoint(self, **kwargs):
         model_to_save = self.model.module if hasattr(self.model, "module") else self.model  # when using DataParallel
         # it is practical (although redundant) to save model weights using huggingface API, because if the model has
@@ -275,4 +276,6 @@ class SiameseTransformerTrainer(TransformerTrainer):
             model_to_save.transformer_rep_q.transformer.save_pretrained(output_dir_q)
             tokenizer = model_to_save.transformer_rep_q.tokenizer
             tokenizer.save_pretrained(output_dir_q)
+
+        # сохранение параметров обучения
         super().save_checkpoint(**kwargs)
