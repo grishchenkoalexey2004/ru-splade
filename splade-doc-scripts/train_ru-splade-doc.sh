@@ -67,8 +67,7 @@ if [ "${DEBUG_SPLADE}" = "0" ]; then
         config.out_dir=$OUT_DIR \
         config.regularizer.FLOPS.lambda_q=0.0000 \
         config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        data.VALIDATION_SIZE_FOR_LOSS=10 \
-        config.random_seed=$SEED
+        config.random_seed=$SEED 
     exit 0
 fi
 
