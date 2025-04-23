@@ -1,5 +1,6 @@
 import json
 import os
+import sys 
 from collections import defaultdict
 
 import torch
@@ -213,7 +214,10 @@ class SiameseTransformerTrainer(TransformerTrainer):
         """loss evaluation
         """
         out_d = defaultdict(float)
-        for batch in data_loader:
+
+        dataloader_iterable = iter(data_loader)
+
+        for batch in dataloader_iterable:
             for k, v in batch.items():
                 batch[k] = v.to(self.device)
             out = self.forward(batch)
@@ -247,7 +251,15 @@ class SiameseTransformerTrainer(TransformerTrainer):
                         out_d["val_{}_loss".format(reg)] += r_loss
                         total_loss += r_loss
                     out_d["val_total_loss"] += total_loss
-        return {key: value / len(data_loader) for key, value in out_d.items()}
+
+        print("Размер dataloader_iterable: ", sys.getsizeof(dataloader_iterable))
+        del dataloader_iterable
+        print("Размер dataloader: ", sys.getsizeof(data_loader))
+
+        data_loader_len = len(data_loader)
+        del data_loader
+
+        return {key: value / data_loader_len for key, value in out_d.items()}
 
     def evaluate_full_ranking(self, i):
         """full ranking evaluation

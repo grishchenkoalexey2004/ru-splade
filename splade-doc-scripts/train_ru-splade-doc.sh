@@ -27,11 +27,10 @@ LAMBDA_D=$1
 if [ "$2" = "debug" ]; then
     export DEBUG_SPLADE=1
     # Remove experiments folder if it exists
-    rm -rf experiments
-    CHECKPOINT_DIR=experiments/debug/checkpoint
-    INDEX_DIR=experiments/debug/index
-    OUT_DIR=experiments/debug/out
-    VALIDATION_SIZE_FOR_LOSS=10
+    rm -rf experiments # чтобы не копились модели !
+    CHECKPOINT_DIR=experiments/debug_${LAMBDA_D}/checkpoint
+    INDEX_DIR=experiments/debug_${LAMBDA_D}/index
+    OUT_DIR=experiments/debug_${LAMBDA_D}/out
 elif [ "$2" = "run" ]; then
     export DEBUG_SPLADE=0
     CHECKPOINT_DIR=models/vk_ru-splade-doc_${LAMBDA_D}/checkpoint
@@ -41,6 +40,9 @@ else
     echo "Error: Invalid mode. Must be 'run' or 'debug'"
     exit 1
 fi
+
+# Generate random seed between 0-1000000
+SEED=$((RANDOM % 1000))
 
 
 
@@ -52,8 +54,9 @@ if [ "${DEBUG_SPLADE}" = "1" ]; then
         config.out_dir=$OUT_DIR \
         config.regularizer.FLOPS.lambda_q=0.0000 \
         config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        data.VALIDATION_SIZE_FOR_LOSS=$VALIDATION_SIZE_FOR_LOSS
-
+        data.VALIDATION_SIZE_FOR_LOSS=10 \
+        config.record_frequency=3 \
+        config.random_seed=$SEED
     exit 0
 fi
 
@@ -64,8 +67,8 @@ if [ "${DEBUG_SPLADE}" = "0" ]; then
         config.out_dir=$OUT_DIR \
         config.regularizer.FLOPS.lambda_q=0.0000 \
         config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        data.VALIDATION_SIZE_FOR_LOSS=10
-
+        data.VALIDATION_SIZE_FOR_LOSS=10 \
+        config.random_seed=$SEED
     exit 0
 fi
 
