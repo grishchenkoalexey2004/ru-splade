@@ -2,16 +2,15 @@
 
 init_dict:
   # базовая модель
-  model_type_or_dir: ai-forever/ruBert-base
+  model_type_or_dir: deepvk/RuModernBERT-base # default value! (may be overridden by command line argument)
   # базовая модель для query
   model_type_or_dir_q: null
   freeze_d_model: 0
   # тип аггрегации (сумма, max и т.д.)
   agg: max
-  fp16: false
+  fp16: true
 
 config:
-  tokenizer_type: ai-forever/ruBert-base
-  # тип модели (splade, splade-doc и т.д.)
+  tokenizer_type: deepvk/RuModernBERT-base # default value! (may be overridden by command line argument)
   matching_type: splade
 

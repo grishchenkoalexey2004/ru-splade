@@ -12,7 +12,6 @@ from ..tasks.base.trainer import TrainerIter
 from ..utils.metrics import init_eval
 from ..utils.utils import parse
 
-
 class TransformerTrainer(TrainerIter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -215,14 +214,14 @@ class SiameseTransformerTrainer(TransformerTrainer):
         """
         out_d = defaultdict(float)
 
-        dataloader_iterable = iter(data_loader)
-
-        for batch in dataloader_iterable:
+        for batch in data_loader:
             for k, v in batch.items():
                 batch[k] = v.to(self.device)
+            
             out = self.forward(batch)
             val_ranking_loss = self.loss(out).mean().item()
             out_d["val_ranking_loss"] += val_ranking_loss
+
             if self.regularizer is not None:
                 if "train" in self.regularizer:
                     total_loss = val_ranking_loss
@@ -252,14 +251,8 @@ class SiameseTransformerTrainer(TransformerTrainer):
                         total_loss += r_loss
                     out_d["val_total_loss"] += total_loss
 
-        print("Размер dataloader_iterable: ", sys.getsizeof(dataloader_iterable))
-        del dataloader_iterable
-        print("Размер dataloader: ", sys.getsizeof(data_loader))
 
-        data_loader_len = len(data_loader)
-        del data_loader
-
-        return {key: value / data_loader_len for key, value in out_d.items()}
+        return {key: value / len(data_loader) for key, value in out_d.items()}
 
     def evaluate_full_ranking(self, i):
         """full ranking evaluation

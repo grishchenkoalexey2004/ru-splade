@@ -87,15 +87,7 @@ def train(exp_dict: DictConfig):
             # just in the case we train a model without reg but still want the eval metrics like L0
             pass
         else:
-            # узнаем какой регуляризатор нужно инициализировать 
-            # там может стоять например это:
-            # regularizer:
-            #     FLOPS:
-            #         lambda_q: 0.0005
-            #         lambda_d: 0.0003
-            #         T: 3
-            #         targeted_rep: rep
-            #         reg: FLOPS
+
             for reg in config["regularizer"]:
                 # targeted_rep - показывает, какое представление вывода модели ограничивать (если их несколько)
                 temp = {"loss": init_regularizer(config["regularizer"][reg]["reg"]),

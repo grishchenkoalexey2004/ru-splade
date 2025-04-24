@@ -1,9 +1,9 @@
 # FILES
 defaults: # (these specify which config FILES to use)
   ############## TRAIN ###################################
-  - train/config: ru-splade_doc
+  - train/config: ru-splade-max
   - train/data: ru-splade
-  - train/model: vk_ru-splade-doc_max
+  - train/model: ru-splade-max # only model changes, config remains the same!
   ############## INDEX ###################################
   - index: msmarco
   ############## RETRIEVE ################################
@@ -17,11 +17,9 @@ config:
   augment_pair: in_batch_negatives
   regularizer:
     FLOPS:
-      lambda_q: 0.0000
-      lambda_d: 0.0001
-      T: 35000
+      lambda_q: 0.0003 # default value! (may be overridden by command line argument)
+      lambda_d: 0.0001 # default value! (may be overridden by command line argument)
+      T: 50000
       targeted_rep: rep
       reg: FLOPS
-  checkpoint_dir: models/vk_ru-splade-doc_max/checkpoint
-  index_dir: models/vk_ru-splade-doc_max/index
-  out_dir: models/vk_ru-splade-doc_max/out
+

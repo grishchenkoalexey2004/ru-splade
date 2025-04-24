@@ -121,12 +121,19 @@ class BaseTrainer:
                 step_last_config = last_config["step"]
                 os.rename(os.path.join(self.checkpoint_dir, "model_ckpt/model_last.tar"),
                           os.path.join(self.checkpoint_dir, "model_ckpt/model_ckpt_{}.tar".format(step_last_config)))
+                
+                # удаляем для предотвращения memory leak (дай аллах чтобы помогло)
+                del last_config
+            
             # save new last:
             torch.save(state, os.path.join(self.checkpoint_dir, "model_ckpt/model_last.tar"))
             if is_best:
                 torch.save(state, os.path.join(self.checkpoint_dir, "model/model.tar"))
             # remove oldest checkpoint (by default only keep the last 3):
             remove_old_ckpt(os.path.join(self.checkpoint_dir, "model_ckpt"), k=2)
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
         else:
             torch.save(state, os.path.join(self.checkpoint_dir, "model_ckpt/model_final_checkpoint.tar"))
             if self.overwrite_final:
