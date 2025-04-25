@@ -1,5 +1,3 @@
-# don't forget to activate mamba env!
-# splade based on ai-forever/ruSbert
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
   
@@ -13,12 +11,11 @@ fi
 
 LAMBDA_D=$1
 
-# Get run/debug mode from second argument
 if [ -z "$2" ]; then
-    echo "Error: run mode parameter is required" 
-    echo "Usage: $0 <lambda_d> <mode>"
-    echo "Example: $0 0.0001 run"
-    echo "         $0 0.0001 debug"
+    echo "Error: model type parameter is required" 
+    echo "Usage: $0 <lambda_d> <model_type>"
+    echo "Example: $0 0.0001 vk"
+    echo "         $0 0.0001 ai-forever"
     exit 1
 fi
 
