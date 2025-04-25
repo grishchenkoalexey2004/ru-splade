@@ -37,17 +37,19 @@ def test_model(checkpoint_dir, index_dir = None, out_dir = None):
     model.eval()
 
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
-
-
     reverse_voc = {v: k  for k, v in tokenizer.vocab.items()}
 
     while True:
         doc = input("Введите пример предложения: ")
 
-        with torch.no_grad():
-            doc_rep = model(d_kwargs=tokenizer(doc, return_tensors="pt"))["d_rep"].squeeze()  # (sparse) doc rep in voc space, shape (30522,)
 
-        print(doc_rep)
+
+        with torch.no_grad():
+            tokens = tokenizer(doc, return_tensors="pt")
+            tokens = tokens.to(device)
+
+            doc_rep = model(d_kwargs=tokens)["d_rep"].squeeze()  # (sparse) doc rep in voc space, shape (30522,)
+
         # get the number of non-zero dimensions in the rep:
         col = torch.nonzero(doc_rep).squeeze().cpu().tolist()
         print("Количество ненулевых измерений: ", len(col))
@@ -68,8 +70,6 @@ def test_model(checkpoint_dir, index_dir = None, out_dir = None):
         print("Bag of words представление:\n", bow_rep)
 
         
-
-
 
 if len(sys.argv) != 4:
     print("Error: Three arguments required")

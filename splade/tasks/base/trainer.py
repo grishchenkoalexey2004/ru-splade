@@ -40,7 +40,8 @@ class BaseTrainer:
         self.scheduler = scheduler
         self.regularizer = regularizer
         self.model = model
-        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        self.device_str = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = torch.device(self.device_str)
         print(" --- total number parameters:", sum([p.nelement() for p in self.model.parameters()]))
         self.model.train()  # put model on train mode
         # config is a dict which must contain at least some training parameters
