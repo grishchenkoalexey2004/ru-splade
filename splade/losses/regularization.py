@@ -1,12 +1,12 @@
 import torch
 
-
+# средняя сумма модулей значений вектора (такой же смысл как и в линейной алгебре)
 class L1:
 
     def __call__(self, batch_rep):
         return torch.sum(torch.abs(batch_rep), dim=-1).mean()
 
-# дефолтный регуляризатор (также используется для подсчета статистики)
+# дефолтный регуляризатор (сред количество ненулевых элементов в векторе)
 class L0:
     """non-differentiable
     """
@@ -14,7 +14,7 @@ class L0:
     def __call__(self, batch_rep):
         return torch.count_nonzero(batch_rep, dim=-1).float().mean()
 
-# flops - регуляризатор
+# flops - регуляризатор (грубо говря среднее количество операций при подсчёте скалярного произведения векторов q и d)
 class FLOPS:
     """constraint from Minimizing FLOPs to Learn Efficient Sparse Representations
     https://arxiv.org/abs/2004.05665
@@ -35,6 +35,7 @@ class RegWeightScheduler:
         self.t = 0
         self.lambda_t = 0
 
+    # ограничивает влияние регуляризации на первых стадиях обучения!
     def step(self):
         """quadratic increase until time T
         """
