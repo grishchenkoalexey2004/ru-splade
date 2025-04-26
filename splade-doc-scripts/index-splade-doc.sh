@@ -66,17 +66,5 @@ python -m splade.index \
     init_dict.model_type_or_dir=$MODEL_NAME \
     config.tokenizer_type=$MODEL_NAME
 
-if [ $? -eq 0 ]; then
-    python -m splade.retrieve \
-        +config.checkpoint_dir=$CHECKPOINT_DIR \
-        +config.index_dir=$INDEX_DIR \
-        +config.out_dir=$OUT_DIR \
-        config.regularizer.FLOPS.lambda_q=0.0000 \
-        config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        +config.random_seed=$SEED \
-        init_dict.model_type_or_dir=$MODEL_NAME \
-        config.tokenizer_type=$MODEL_NAME
-    exit $?
-else
-    exit 1
-fi
+
+exit 0
