@@ -147,7 +147,7 @@ def get_dataset_name(path):
     elif "toy" in path:
         return "TOY"
     else:
-        # если ничего не подошло, то возвращаем "other_dataset"
+        # если ничего не подошло, то возвращаем "shrinked_dataset"
         return "shrinked_dataset"
 
 # разделяет конфигурационный файл на сегменты
