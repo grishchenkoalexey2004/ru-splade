@@ -25,6 +25,6 @@ if [ "$2" != "vk" ] && [ "$2" != "ai-forever" ]; then
     exit 1
 fi
 
-
+MODEL_TYPE=$2
 
 bash splade-doc-scripts/index-splade-doc.sh $LAMBDA_D $MODEL_TYPE && bash splade-doc-scripts/eval-splade-doc.sh $LAMBDA_D $MODEL_TYPE
