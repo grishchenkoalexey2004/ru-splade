@@ -27,4 +27,4 @@ fi
 
 
 
-bash index-splade-doc.sh $LAMBDA_D $MODEL_TYPE && bash eval-splade-doc.sh $LAMBDA_D $MODEL_TYPE
+bash splade-doc-scripts/index-splade-doc.sh $LAMBDA_D $MODEL_TYPE && bash splade-doc-scripts/eval-splade-doc.sh $LAMBDA_D $MODEL_TYPE
