@@ -8,7 +8,8 @@ from transformers import AutoTokenizer
 
 from ..utils.utils import rename_keys
 
-# нужен для определения и инициализации нашего токенизатора!
+# нужная надстройка для определения и инициализации нашего токенизатора!
+# 
 class DataLoaderWrapper(DataLoader):
     def __init__(self, tokenizer_type, max_length, **kwargs):
         self.max_length = max_length
@@ -100,13 +101,17 @@ class CollectionDataLoader(DataLoaderWrapper):
         batch is a list of tuples, each tuple has 2 (text) items (id_, doc)
         """
         id_, d = zip(*batch)
+        # получаем тензор из токентов документов!
         processed_passage = self.tokenizer(list(d),
                                            add_special_tokens=True,
                                            padding="longest",  # pad to max sequence length in batch
                                            truncation="longest_first",  # truncates to self.max_length
                                            max_length=self.max_length,
                                            return_attention_mask=True)
+        # возвращаем словарь с токенами и id 
+        # все тензоры переводим в torch.tensor
         return {**{k: torch.tensor(v) for k, v in processed_passage.items()},
+                # id обрабатываемых документов 
                 "id": torch.tensor([int(i) for i in id_], dtype=torch.long)}
 
 

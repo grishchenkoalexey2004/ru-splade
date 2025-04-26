@@ -30,42 +30,71 @@ class SparseIndexing(Evaluator):
             self.l0 = L0()
 
     def index(self, collection_loader, id_dict=None):
+        # список id всех ранее обработанных документов 
         doc_ids = []
+
+        # подсчет статистики о разреженности индекса по различным метрикам
         if self.compute_stats:
             stats = defaultdict(float)
+
+        # количество обработанных документов 
         count = 0
         with torch.no_grad():
             for t, batch in enumerate(tqdm(collection_loader)):
+                # перекидываем output токенизатора на видеокарту
                 inputs = {k: v.to(self.device) for k, v in batch.items() if k not in {"id"}}
+
+                # генерация векторов моделью (в зависимости от того, что индексируется: документ или запрос)
                 if self.is_query:
                     batch_documents = self.model(q_kwargs=inputs)["q_rep"]
                 else:
                     batch_documents = self.model(d_kwargs=inputs)["d_rep"]
+
+
                 if self.compute_stats:
                     stats["L0_d"] += self.l0(batch_documents).item()
+
+                # получаем индексы матрицы с ненулевыми значениями
+                # вывод функции torch.nonzero будет такой: (torch.tensor(....),torch.tensor(...))
                 row, col = torch.nonzero(batch_documents, as_tuple=True)
+                # матрица ненулевых значений тензора batch_documents
                 data = batch_documents[row, col]
                 row = row + count
                 batch_ids = to_list(batch["id"])
                 if id_dict:
                     batch_ids = [id_dict[x] for x in batch_ids]
+
+                # увеличиваем количество обработанных документов
                 count += len(batch_ids)
+                # добавляем id документов батча в список обработанных документов 
                 doc_ids.extend(batch_ids)
+
+                # добавление в инвертированный индекс документов батча
+                # с numpy можно работать только на cpu!
                 self.sparse_index.add_batch_document(row.cpu().numpy(), col.cpu().numpy(), data.cpu().numpy(),
                                                      n_docs=len(batch_ids))
+        
+        # усреднение статистики по всем документам 
         if self.compute_stats:
             stats = {key: value / len(collection_loader) for key, value in stats.items()}
+
+        # если есть папка для сохранения индекса, то сохраняем индекс и id документов
         if self.index_dir is not None:
+            # сохранение разреженного индекса
             self.sparse_index.save()
+            # сохранение id документов
             pickle.dump(doc_ids, open(os.path.join(self.index_dir, "doc_ids.pkl"), "wb"))
+
             print("done iterating over the corpus...")
+            # что это?
             print("index contains {} posting lists".format(len(self.sparse_index)))
+            # количество документов в индексе
             print("index contains {} documents".format(len(doc_ids)))
             if self.compute_stats:
                 with open(os.path.join(self.index_dir, "index_stats.json"), "w") as handler:
                     json.dump(stats, handler)
         else:
-            # if no index_dir, we do not write the index to disk but return it
+            # если нет папки для сохранения индекса, то возвращаем индекс и id документов в качества объекта пайтон
             for key in list(self.sparse_index.index_doc_id.keys()):
                 # convert to numpy
                 self.sparse_index.index_doc_id[key] = np.array(self.sparse_index.index_doc_id[key], dtype=np.int32)
@@ -80,6 +109,7 @@ class SparseRetrieval(Evaluator):
     """retrieval from SparseIndexing
     """
 
+    # выбор топ-k лучших документов 
     @staticmethod
     def select_topk(filtered_indexes, scores, k):
         # topk лучших ответов
@@ -90,14 +120,17 @@ class SparseRetrieval(Evaluator):
             scores = -scores
         return filtered_indexes, scores
 
+    # вычисления скора близости 
     @staticmethod
     @numba.njit(nogil=True, parallel=True, cache=True)
     def numba_score_float(inverted_index_ids: numba.typed.Dict,
                           inverted_index_floats: numba.typed.Dict,
                           indexes_to_retrieve: np.ndarray,
                           query_values: np.ndarray,
+                          # порог по близости (не берем документы ниже данного порога)
                           threshold: float,
                           size_collection: int):
+        # инициализация массива скоров (по 1-ому скору на каждый документ)
         scores = np.zeros(size_collection, dtype=np.float32)  # initialize array with size = size of collection
         n = len(indexes_to_retrieve)
         for _idx in range(n):
@@ -114,28 +147,36 @@ class SparseRetrieval(Evaluator):
     def __init__(self, model, config, dim_voc, dataset_name=None, index_d=None, compute_stats=False, is_beir=False,
                  **kwargs):
         super().__init__(model, config, **kwargs)
+        # проверяем, что нам известно, где находится собранный индекс документа! 
         assert ("index_dir" in config and index_d is None) or (
                 "index_dir" not in config and index_d is not None)
         if "index_dir" in config:
+            # загружаем ранее созданный индекс
             self.sparse_index = IndexDictOfArray(config["index_dir"], dim_voc=dim_voc)
             self.doc_ids = pickle.load(open(os.path.join(config["index_dir"], "doc_ids.pkl"), "rb"))
         else:
+            # загрузка готового объекат
             self.sparse_index = index_d["index"]
             self.doc_ids = index_d["ids_mapping"]
+            # добавляем пустые массивы для токенов, которые не встречаются в индексе 
+            # нужно для корректной работы numba
             for i in range(dim_voc):
                 # missing keys (== posting lists), causing issues for retrieval => fill with empty
                 if i not in self.sparse_index.index_doc_id:
                     self.sparse_index.index_doc_id[i] = np.array([], dtype=np.int32)
                     self.sparse_index.index_doc_value[i] = np.array([], dtype=np.float32)
-        # convert to numba
+        # инициализация словарей для numba
         self.numba_index_doc_ids = numba.typed.Dict()
         self.numba_index_doc_values = numba.typed.Dict()
+
+        # перевод словарей IndexDictOfArray в словари numba
         for key, value in self.sparse_index.index_doc_id.items():
             self.numba_index_doc_ids[key] = value
         for key, value in self.sparse_index.index_doc_value.items():
             self.numba_index_doc_values[key] = value
         self.out_dir = os.path.join(config["out_dir"], dataset_name) if (dataset_name is not None and not is_beir) \
             else config["out_dir"]
+        # статистика по распределению количества документов для каждого токена
         self.doc_stats = index_d["stats"] if (index_d is not None and compute_stats) else None
         self.compute_stats = compute_stats
         if self.compute_stats:
@@ -149,30 +190,47 @@ class SparseRetrieval(Evaluator):
         if self.compute_stats:
             stats = defaultdict(float)
         with torch.no_grad():
+            # загружаем вопросы по одному
             for t, batch in enumerate(tqdm(q_loader)):
                 q_id = to_list(batch["id"])[0]
+                # если есть id-mapping
                 if id_dict:
                     q_id = id_dict[q_id]
+
+                # outputs из токенизатора!
                 inputs = {k: v for k, v in batch.items() if k not in {"id"}}
+                # перекидываем output токенизатора на видеокарту
                 for k, v in inputs.items():
                     inputs[k] = v.to(self.device)
+                
+                # генерация вектора запроса нашей моделью (модель была загружена в классе Evaluator)
                 query = self.model(q_kwargs=inputs)["q_rep"]  # we assume ONE query per batch here
+
+                # подсчет статистики L0 по запросам
                 if self.compute_stats:
                     stats["L0_q"] += self.l0(query).item()
-                # TODO: batched version for retrieval
+
+                # батч запроса длины 1! row везде 0, а col хранит индексы ненулевых значений
                 row, col = torch.nonzero(query, as_tuple=True)
+                # веса запроса 
                 values = query[to_list(row), to_list(col)]
-                filtered_indexes, scores = self.numba_score_float(self.numba_index_doc_ids,
-                                                                  self.numba_index_doc_values,
-                                                                  col.cpu().numpy(),
-                                                                  values.cpu().numpy().astype(np.float32),
-                                                                  threshold=threshold,
-                                                                  size_collection=self.sparse_index.nb_docs())
+
+                # вычисление скора близости
+                filtered_indexes, scores = self.numba_score_float(self.numba_index_doc_ids, # индекс документов 
+                                                                  self.numba_index_doc_values, # индекс документов
+                                                                  col.cpu().numpy(), # ненулевые индексы запроса
+                                                                  values.cpu().numpy().astype(np.float32), # ненулевые значения запроса
+                                                                  threshold=threshold, # порог
+                                                                  size_collection=self.sparse_index.nb_docs()) # размер коллекции документов
+                
                 # threshold set to 0 by default, could be better
+                # выбор топ-k лучших документов по запросу
                 filtered_indexes, scores = self.select_topk(filtered_indexes, scores, k=top_k)
+                # формирование словаря с результатами: qid -> docid -> score !
                 for id_, sc in zip(filtered_indexes, scores):
                     res[str(q_id)][str(self.doc_ids[id_])] = float(sc)
         if self.compute_stats:
+            # усреднение статистики l0 по всем запросам
             stats = {key: value / len(q_loader) for key, value in stats.items()}
         if self.compute_stats:
             with open(os.path.join(self.out_dir, "stats",
@@ -184,9 +242,13 @@ class SparseRetrieval(Evaluator):
                                        "d_stats{}.json".format("_iter_{}".format(name) if name is not None else "")),
                           "w") as handler:
                     json.dump(self.doc_stats, handler)
+
+        # сохранение результатов поиска в json формате
         with open(os.path.join(self.out_dir, "run{}.json".format("_iter_{}".format(name) if name is not None else "")),
                   "w") as handler:
             json.dump(res, handler)
+        
+        # возвращаем результаты нашего поиска (и статистику)
         if return_d:
             out = {"retrieval": res}
             if self.compute_stats:
@@ -247,7 +309,7 @@ class EncodeAnserini(Evaluator):
                             [" ".join([str(real_token)] * freq) for real_token, freq in dict_splade.items()])
                         collection_file.write(str(id_) + "\t" + string_splade + "\n")
 
-
+# получая на вход загрузчик коллекции и запросов создаёт разреженный индекс, потом выполняет evaluation
 class SparseApproxEvalWrapper(Evaluator):
     """
     wrapper for sparse indexer + retriever during training

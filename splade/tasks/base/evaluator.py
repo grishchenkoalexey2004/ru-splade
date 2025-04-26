@@ -4,7 +4,8 @@ import torch
 
 from splade.utils.utils import restore_model
 
-
+# базовый класс для валидационных классов 
+# отвечает за загрузку модели и ее перемещение на видеокарту!
 class Evaluator:
     def __init__(self, model, config=None, restore=True):
         """
@@ -15,7 +16,7 @@ class Evaluator:
         self.model = model
         self.config = config
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        if restore:
+        if restore: # если восстанавливаем модель по чекпоинту
             # if config.get("adapter_name", None):                   
             #     adapter_path = config.get("adapter_path", os.path.join(config["checkpoint_dir"],"model"))
             #     if config.get("is_reranker", False):
@@ -58,7 +59,7 @@ class Evaluator:
                     pass                    
                 elif ("pretrained_no_yamlconfig" not in config or not config["pretrained_no_yamlconfig"] ):
                     checkpoint = torch.load(os.path.join(config["checkpoint_dir"], "model/model.tar"),
-                                            map_location=self.device)
+                                            map_location=self.device,weights_only=False)
                     restore_model(model, checkpoint["model_state_dict"])
         else:
             print("WARNING: init evaluator, NOT restoring the model, NOT placing on device")

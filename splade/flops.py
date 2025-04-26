@@ -27,7 +27,7 @@ def create_index_dist(index):
         index_dist[int(k)] = len(v)
     return index_dist
 
-
+# подсчёт метрики flops
 @hydra.main(config_path=CONFIG_PATH, config_name=CONFIG_NAME)
 def flops(exp_dict: DictConfig):
     # считает flops на определённом поднаборе query и documents

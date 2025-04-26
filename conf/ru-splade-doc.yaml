@@ -5,9 +5,9 @@ defaults: # (these specify which config FILES to use)
   - train/data: ru-splade
   - train/model: ru-splade-doc
   ############## INDEX ###################################
-  - index: msmarco
+  - index: ru-splade
   ############## RETRIEVE ################################
-  - retrieve_evaluate: all
+  - retrieve_evaluate: ru-splade
   ############### FLOPS ##################################
   - flops: msmarco
 

@@ -18,6 +18,7 @@ def load_and_evaluate(qrel_file_path, run_file_path, metric):
         print("MRR@10:", res)
         return {"mrr_10": res}
     else:
+
         res = evaluate(run, qrel, metric=metric)
         print(metric, "==>", res)
         return res

@@ -74,6 +74,7 @@ class DistilPairsDatasetPreLoad(Dataset):
         return self.data_dict[idx]
 
 # загрузка документов или query 
+# все операции такие же как и для триплетов!
 class CollectionDatasetPreLoad(Dataset):
     """
     dataset to iterate over a document/query collection, format per line: format per line: doc_id \t doc
@@ -94,9 +95,7 @@ class CollectionDatasetPreLoad(Dataset):
                     id_, *data = line.split("\t")  # first column is id
                     # убирает табуляции и \n из текстов документов
                     data = " ".join(" ".join(data).splitlines())
-                    # удаляем дефектные строки 
                     
-                    # если строка не дефектная, то добавляем в словарь 
                     # нумерация пар по номеру строки
                     if self.id_style == "row_id":
                         self.data_dict[i] = data # словарь номер_строки -> информация
