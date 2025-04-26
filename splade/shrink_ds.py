@@ -22,12 +22,14 @@ def shrink_ds(qrels_path:str, collection_path:str, queries_path:str, num_docs:in
     collection_dir = os.path.dirname(collection_path)
     
     query_ids = [] 
+    query_texts = {}
     relevant_doc_ids = [] 
 
     with open(queries_path, 'r') as f:
         for line in f:
-            query_id,_ = line.split('\t')
+            query_id, query_text = line.split('\t')
             query_ids.append(query_id)
+            query_texts[query_id] = query_text
 
     if num_queries == None:
         num_queries = len(query_ids)
@@ -35,8 +37,11 @@ def shrink_ds(qrels_path:str, collection_path:str, queries_path:str, num_docs:in
     
     query_ids = np.random.choice(query_ids, size=num_queries, replace=False)
 
-    for query_id in query_ids:
-        relevant_doc_ids.extend(list(qrels[query_id].keys()))
+    # выбираем документы релевантные для выбранных запросов (если количество запросов не указано, то выбираем все запросы и все релевантные к ним документы!)
+    with open(os.path.join(os.path.dirname(queries_path), f'shrinked_queries_{num_queries}.tsv'), 'w') as f_out:
+        for query_id in query_ids:
+            relevant_doc_ids.extend(list(qrels[query_id].keys()))
+            f_out.write(f"{query_id}\t{query_texts[query_id]}")
 
 
 
@@ -95,15 +100,24 @@ def shrink_ds(qrels_path:str, collection_path:str, queries_path:str, num_docs:in
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Error: run_mode and doc_num must be specified")
+        print("Usage: python shrink_ds.py <run_mode> <doc_num> [<query_num>]")
+        exit(1)
 
     run_mode = sys.argv[1]
+    num_docs = int(sys.argv[2])
+    num_queries = int(sys.argv[3]) if len(sys.argv) > 3 else None
 
 
     if run_mode == None:
         print("Ошибка: не указан режим выполнения")
         exit(1) 
 
-    num_docs = int(input("Введите количество требуемых документов: "))
+
+    print(f"Режим выполнения: {run_mode}")
+    print(f"Количество требуемых документов: {num_docs}")
+    print(f"Количество требуемых запросов: {num_queries}")
 
     if run_mode == "run":
 
@@ -111,7 +125,7 @@ if __name__ == "__main__":
         queries_path = "data/msmarco-ru/queries/dev/dev_queries.tsv"
         qrels_path = "data/msmarco-ru/qrels/dev_qrel.json"
 
-        shrink_ds(qrels_path=qrels_path, collection_path=collection_path, queries_path=queries_path, num_docs=num_docs)
+        shrink_ds(qrels_path=qrels_path, collection_path=collection_path, queries_path=queries_path, num_docs=num_docs,num_queries=num_queries)
 
     elif run_mode == "debug":
         collection_len = 33
@@ -119,8 +133,11 @@ if __name__ == "__main__":
         queries_path = "data/dev_queries/raw.tsv"
         qrels_path = "data/dev_qrel.json"
 
-        shrink_ds(qrels_path=qrels_path, collection_path=collection_path, queries_path=queries_path, num_docs=num_docs,collection_len=collection_len)
+        shrink_ds(qrels_path=qrels_path, collection_path=collection_path, queries_path=queries_path, num_docs=num_docs,num_queries=num_queries,collection_len=collection_len)
 
+    else:
+        print("Ошибка: неверный режим выполнения")
+        exit(1)
 
 
 
