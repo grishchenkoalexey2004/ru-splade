@@ -10,3 +10,7 @@ experiments/
 data/msmarco-ru
 models
 data/triplets
+data/full_collection
+data/dev_queries
+data/dev_qrel.json
+
