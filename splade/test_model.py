@@ -9,7 +9,7 @@ from transformers import AutoTokenizer
 from .models.transformer_rep import Splade,SpladeDoc
 
 
-# проверка базовой работоспособности модели на простых примерах
+# проверка базовой работоспособности модели на предложениях вводимых пользователем с клавиатуры
 def test_model(checkpoint_dir, index_dir = None, out_dir = None):
 
     # перенос модели на cpu/gpu

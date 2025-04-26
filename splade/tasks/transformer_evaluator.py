@@ -174,6 +174,8 @@ class SparseRetrieval(Evaluator):
             self.numba_index_doc_ids[key] = value
         for key, value in self.sparse_index.index_doc_value.items():
             self.numba_index_doc_values[key] = value
+
+
         self.out_dir = os.path.join(config["out_dir"], dataset_name) if (dataset_name is not None and not is_beir) \
             else config["out_dir"]
         # статистика по распределению количества документов для каждого токена
@@ -205,8 +207,7 @@ class SparseRetrieval(Evaluator):
                 
                 # генерация вектора запроса нашей моделью (модель была загружена в классе Evaluator)
                 query = self.model(q_kwargs=inputs)["q_rep"]  # we assume ONE query per batch here
-
-                # подсчет статистики L0 по запросам
+                # Count nonzero elements in query tensor
                 if self.compute_stats:
                     stats["L0_q"] += self.l0(query).item()
 
@@ -223,6 +224,7 @@ class SparseRetrieval(Evaluator):
                                                                   threshold=threshold, # порог
                                                                   size_collection=self.sparse_index.nb_docs()) # размер коллекции документов
                 
+
                 # threshold set to 0 by default, could be better
                 # выбор топ-k лучших документов по запросу
                 filtered_indexes, scores = self.select_topk(filtered_indexes, scores, k=top_k)

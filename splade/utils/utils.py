@@ -128,7 +128,7 @@ def normalize(tensor, eps=1e-9):
 
 
 def get_dataset_name(path):
-    # small (hard-coded !) snippet to get a dataset name from a Q_COLLECTION_PATH or a EVAL_QREL_PATH (full paths)
+    # достает имя датасета из пути к Q_COLLECTION_PATH или EVAL_QREL_PATH
     if "TREC_DL_2019" in path:
         return "TREC_DL_2019"
     elif "trec2020" in path or "TREC_DL_2020" in path:
@@ -147,7 +147,8 @@ def get_dataset_name(path):
     elif "toy" in path:
         return "TOY"
     else:
-        return "other_dataset"
+        # если ничего не подошло, то возвращаем "other_dataset"
+        return "shrinked_dataset"
 
 # разделяет конфигурационный файл на сегменты
 def get_initialize_config(exp_dict: DictConfig, train=False):

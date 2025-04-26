@@ -34,6 +34,7 @@ def index(exp_dict: DictConfig):
                                     shuffle=False, num_workers=8, prefetch_factor=4)
     
     # построение разреженного обратного индекса с использованием hdf5
+    # dataset name = None! 
     evaluator = SparseIndexing(model=model, config=config, compute_stats=True)
     # постепенная индексация того, что у нас там лежит
     evaluator.index(d_loader)

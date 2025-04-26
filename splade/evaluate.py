@@ -28,12 +28,7 @@ def evaluate(exp_dict: DictConfig):
             for metric in eval_metrics:
                 qrel_fp=qrel_file_path
                 run_fp=os.path.join(out_dir, dataset_name, 'run.json') 
-                # Create parent directory for run file if it doesn't exist
-                os.makedirs(os.path.dirname(run_fp), exist_ok=True)
-                # Create empty run file if it doesn't exist
-                if not os.path.exists(run_fp):
-                    with open(run_fp, "w") as f:
-                        f.write("{}")
+                print("Ищем run-файл в", run_fp)
                 res.update(load_and_evaluate(qrel_file_path=qrel_fp,
                                              run_file_path=run_fp,
                                              metric=metric))
@@ -45,7 +40,6 @@ def evaluate(exp_dict: DictConfig):
             json.dump(res, open(out_fp,"a"))
     out_all_fp= os.path.join(out_dir, "perf_all_datasets.json")
     json.dump(res_all_datasets, open(out_all_fp, "a"))
-
     return res_all_datasets
 
 if __name__ == '__main__':
