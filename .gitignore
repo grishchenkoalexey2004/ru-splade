@@ -13,4 +13,4 @@ data/triplets
 data/full_collection
 data/dev_queries
 data/dev_qrel.json
-
+test.py

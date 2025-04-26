@@ -5,9 +5,9 @@ mkdir -p data/full_collection
 cd data/full_collection
 
 if [ ! -f raw.tsv ]; then
-    wget https://huggingface.co/datasets/lesha-grishchenko/russian-ranking-triples/resolve/main/collection.tsv.gz
-    gzip -d collection.tsv.gz
-    mv collection.tsv raw.tsv
+    wget https://huggingface.co/datasets/lesha-grishchenko/russian-ranking-triples/resolve/main/shrinked_collection_400000.tsv.gz
+    gzip -d shrinked_collection_400000.tsv.gz
+    mv shrinked_collection_400000.tsv raw.tsv
 else
     echo "Collection already downloaded"
 fi
