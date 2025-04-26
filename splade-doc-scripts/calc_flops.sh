@@ -1,5 +1,4 @@
-# usage: bash evaluate_splade-doc.sh <lambda_d> <model_type>
-
+# данный скрипт запускает вычисление flops для модели 
 
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
@@ -46,7 +45,7 @@ OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
 
 
 SEED=$((RANDOM % 1000))
-    python -m splade.retrieve \
+python -m splade.flops \
         +config.checkpoint_dir=$CHECKPOINT_DIR \
         +config.index_dir=$INDEX_DIR \
         +config.out_dir=$OUT_DIR \

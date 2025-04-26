@@ -9,7 +9,7 @@ defaults: # (these specify which config FILES to use)
   ############## RETRIEVE ################################
   - retrieve_evaluate: ru-splade
   ############### FLOPS ##################################
-  - flops: msmarco
+  - flops: ru-splade
 
 # Direct PARAMETER setting
 config:
@@ -17,7 +17,7 @@ config:
   augment_pair: in_batch_negatives
   regularizer:
     FLOPS:
-      lambda_q: 0.0000
+      lambda_q: 0.0000 # do not override! 
       lambda_d: 0.0001 # default value! (may be overridden by command line argument)
       T: 25000
       targeted_rep: rep

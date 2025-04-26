@@ -56,8 +56,13 @@ def flops(exp_dict: DictConfig):
     lexical_queries_index_dist = create_index_dist(query_index)
     lexical_index_dist = create_index_dist(doc_index)
 
+    # вероятности появления токенов на позициях для документа 
     p_d = estim_act_prob(lexical_index_dist, collection_size=doc_index.nb_docs(), voc_size=out_dim)
+    
+    # вероятности появления токенов на позициях для запроса
     p_q = estim_act_prob(lexical_queries_index_dist, collection_size=len(q_collection), voc_size=out_dim)
+
+    # скалярное произведение векторов дает flops метрику! 
     flops = np.sum(p_d * p_q)
     res = dict(flops=flops)
     out_dir = exp_dict.config.out_dir

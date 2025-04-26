@@ -1,3 +1,4 @@
+# вычисление индекса + evaluation + flops! 
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
   
@@ -27,4 +28,6 @@ fi
 
 MODEL_TYPE=$2
 
-bash splade-doc-scripts/index-splade-doc.sh $LAMBDA_D $MODEL_TYPE && bash splade-doc-scripts/eval-splade-doc.sh $LAMBDA_D $MODEL_TYPE
+bash splade-doc-scripts/index-splade-doc.sh $LAMBDA_D $MODEL_TYPE
+bash splade-doc-scripts/eval-splade-doc.sh $LAMBDA_D $MODEL_TYPE
+bash splade-doc-scripts/calc_flops.sh $LAMBDA_D $MODEL_TYPE

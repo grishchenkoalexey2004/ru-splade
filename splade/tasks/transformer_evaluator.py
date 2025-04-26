@@ -13,7 +13,7 @@ from ..indexing.inverted_index import IndexDictOfArray
 from ..losses.regularization import L0
 from ..tasks.base.evaluator import Evaluator
 from ..utils.utils import makedir, to_list
-
+import time
 
 class SparseIndexing(Evaluator):
     """sparse indexing
@@ -216,6 +216,8 @@ class SparseRetrieval(Evaluator):
                 # веса запроса 
                 values = query[to_list(row), to_list(col)]
 
+                start_time = time.time()
+
                 # вычисление скора близости
                 filtered_indexes, scores = self.numba_score_float(self.numba_index_doc_ids, # индекс документов 
                                                                   self.numba_index_doc_values, # индекс документов
@@ -224,6 +226,8 @@ class SparseRetrieval(Evaluator):
                                                                   threshold=threshold, # порог
                                                                   size_collection=self.sparse_index.nb_docs()) # размер коллекции документов
                 
+                speed = time.time() - start_time
+                stats["speed"] += speed
 
                 # threshold set to 0 by default, could be better
                 # выбор топ-k лучших документов по запросу
