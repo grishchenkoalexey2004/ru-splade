@@ -31,7 +31,7 @@ def index(exp_dict: DictConfig):
     d_loader = CollectionDataLoader(dataset=d_collection, tokenizer_type=model_training_config["tokenizer_type"],
                                     max_length=model_training_config["max_length"],
                                     batch_size=config["index_retrieve_batch_size"],
-                                    shuffle=False, num_workers=10, prefetch_factor=4)
+                                    shuffle=False, num_workers=8, prefetch_factor=4)
     
     # построение разреженного обратного индекса с использованием hdf5
     evaluator = SparseIndexing(model=model, config=config, compute_stats=True)

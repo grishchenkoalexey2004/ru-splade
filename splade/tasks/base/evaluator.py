@@ -43,7 +43,8 @@ class Evaluator:
                     ## model already loaded
                     pass
                 elif ("pretrained_no_yamlconfig" not in config or not config["pretrained_no_yamlconfig"] ):
-                    checkpoint = torch.load(os.path.join(config["checkpoint_dir"], "model/model.tar"))
+                    checkpoint = torch.load(os.path.join(config["checkpoint_dir"], "model/model.tar"),
+                                            map_location=self.device,weights_only=False)
                     restore_model(model, checkpoint["model_state_dict"])
 
                 self.model.eval()
