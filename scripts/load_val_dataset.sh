@@ -30,8 +30,7 @@ fi
 cd ..
 
 if [ ! -f dev_qrel.json ]; then
-    wget https://huggingface.co/datasets/lesha-grishchenko/russian-ranking-triples/resolve/main/qrels.dev.json
-    mv qrels.dev.json dev_qrel.json
+    wget https://huggingface.co/datasets/lesha-grishchenko/russian-ranking-triples/resolve/main/dev_qrel.json
 else
     echo "Dev qrel already downloaded"
 fi
