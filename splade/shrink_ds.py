@@ -53,7 +53,7 @@ def shrink_ds(qrels_path:str, collection_path:str, queries_path:str, num_docs:in
         exit(1)
 
     
-    relevant_doc_ids = list(map(int, relevant_doc_ids))
+    relevant_doc_ids = list(set(list(map(int, relevant_doc_ids))))
     
     left_doc_ids = np.setdiff1d(np.arange(collection_len), relevant_doc_ids)
 
@@ -79,8 +79,12 @@ def shrink_ds(qrels_path:str, collection_path:str, queries_path:str, num_docs:in
                     included_nonrel_ids.append(doc_id)
                     
 
-    
+    # сохраняем коллекцию!
     print(f"Коллекция сохранена в {os.path.join(collection_dir, f'shrinked_collection_{num_docs}.tsv')}")
+
+    print(relevant_doc_ids)
+    print(left_doc_ids)
+
 
     # Find missing relevant docs
     missing_rel_ids = set(relevant_doc_ids) - set(included_rel_ids)
