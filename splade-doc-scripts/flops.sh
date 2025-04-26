@@ -37,8 +37,6 @@ fi
 
 
 
-#! No debug for evaluation! 
-
 CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/checkpoint
 INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/index
 OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out

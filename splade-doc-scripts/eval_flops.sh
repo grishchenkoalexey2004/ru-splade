@@ -1,5 +1,4 @@
-# prints all metrics of model 
-
+# usage: bash evaluate_splade-doc.sh <lambda_d> <model_type>
 
 
 export PYTHONPATH=$PYTHONPATH:$(pwd)
@@ -31,54 +30,7 @@ fi
 
 MODEL_TYPE=$2
 
-INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/index
-OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
+CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/checkpoint
 
-
-cd $INDEX_DIR
-echo "Index L_0: " 
-cat index_stats.json
-
-echo 
-echo "-------------------------------" 
-
-echo "Index size:"
-du array_index.h5py
-
-echo 
-echo "-------------------------------" 
-
-cd ../out
-
-echo "flops stats:"
-cat flops.json
-
-echo 
-echo "-------------------------------" 
-
-cd shrinked_dataset
-
-echo "Ranking metrics:"
-cat perf.json
-
-echo 
-echo "-------------------------------" 
-
-cd stats
-echo "query stats:"
-cat q_stats.json
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+rm -rf $CHECKPOINT_DIR/out
+bash splade-doc-scripts/eval.sh $LAMBDA_D $MODEL_TYPE && bash splade-doc-scripts/flops.sh $LAMBDA_D $MODEL_TYPE

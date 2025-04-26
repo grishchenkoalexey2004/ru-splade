@@ -28,6 +28,6 @@ fi
 
 MODEL_TYPE=$2
 
-bash splade-doc-scripts/index-splade-doc.sh $LAMBDA_D $MODEL_TYPE
-bash splade-doc-scripts/eval-splade-doc.sh $LAMBDA_D $MODEL_TYPE
-bash splade-doc-scripts/calc_flops.sh $LAMBDA_D $MODEL_TYPE
+bash splade-doc-scripts/index.sh $LAMBDA_D $MODEL_TYPE
+bash splade-doc-scripts/eval.sh $LAMBDA_D $MODEL_TYPE
+bash splade-doc-scripts/flops.sh $LAMBDA_D $MODEL_TYPE
