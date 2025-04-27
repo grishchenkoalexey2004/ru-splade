@@ -22,10 +22,10 @@ mkdir -p queries
 cd queries
 
 if [ ! -f raw.tsv ]; then
-    wget https://huggingface.co/datasets/lesha-grishchenko/russian-ranking-triples/resolve/main/dev_queries.tsv
-    mv dev_queries.tsv raw.tsv
+    wget https://huggingface.co/datasets/lesha-grishchenko/russian-ranking-triples/resolve/main/shrinked_queries_500.tsv
+    mv shrinked_queries_500.tsv raw.tsv
 else
-    echo "Dev queries already downloaded"
+    echo "Shrinked queries already downloaded"
 fi
 
 cd ../..
