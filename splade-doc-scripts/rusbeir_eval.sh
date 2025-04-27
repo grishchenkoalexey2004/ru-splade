@@ -64,8 +64,8 @@ DATASET_DIR=${OUT_DIR}/rusbeir/${DATASET_NAME}
 echo "Dataset will be saved in: $DATASET_DIR"
 
 if [ -d "$DATASET_DIR" ]; then
-    echo "Removing existing dataset directory: $DATASET_DIR"
-    rm -rf $DATASET_DIR
+    echo "Dataset already exists! Exiting..."
+    exit 1
 fi
 
 
