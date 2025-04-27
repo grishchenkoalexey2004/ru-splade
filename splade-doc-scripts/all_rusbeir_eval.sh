@@ -39,7 +39,7 @@ OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
 
 
 
-DATASETS=("kaengreg/rus-scifact" "kaengreg/rubq" "kaengreg/rus-arguana" "kaengreg/rus-nfcorpus" "kaengreg/rus-tidiqa" "kaengreg/rus-xquad")
+DATASETS=("kaengreg/rus-scifact" "kaengreg/rubq" "kaengreg/rus-arguana" "kaengreg/rus-nfcorpus" "kaengreg/rus-tydiqa" "kaengreg/rus-xquad")
 
 for DATASET_NAME in "${DATASETS[@]}"; do
     echo "Processing dataset: $DATASET_NAME"

@@ -64,13 +64,18 @@ def retrieve(exp_dict: DictConfig):
 
     qrels_name = ds_name+"-qrels"
 
+    # разные датасеты имеют разные сплиты для qrels! 
     try:
         corpus, queries, qrels = HFDataLoader(hf_repo=ds_name, hf_repo_qrels=qrels_name, streaming=False,
-                                        keep_in_memory=False,text_type='text').load() 
+                                        keep_in_memory=False,text_type='text').load(split='test') 
         
-    except Exception as e:
-        print(f"Error loading train split: {e}")
-        exit(1)
+    except:
+        try:
+            corpus, queries, qrels = HFDataLoader(hf_repo=ds_name, hf_repo_qrels=qrels_name, streaming=False,
+                                        keep_in_memory=False).load(split='dev') # select necessary split train/test/dev
+        except:
+            corpus, queries, qrels = HFDataLoader(hf_repo=ds_name, hf_repo_qrels=qrels_name, streaming=False,
+                                        keep_in_memory=False).load(split='train') # select necessary split train/test/dev
 
     
     # qrels обрабатывать не надо 
