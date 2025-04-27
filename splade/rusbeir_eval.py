@@ -6,14 +6,14 @@ import os.path
 import hydra
 from beir import util, LoggingHandler
 # from beir.datasets.data_loader import GenericDataLoader
-from rusbeir.dataloader import HFDataLoader
+from .datasets.rusbeir import HFDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from omegaconf import DictConfig
 from tqdm.auto import tqdm
 
 from conf.CONFIG_CHOICE import CONFIG_NAME, CONFIG_PATH
 from .datasets.dataloaders import CollectionDataLoader
-from .datasets.datasets import BeirDataset
+from .datasets.datasets import RusBeirDataset
 from .models.models_utils import get_model
 from .tasks.transformer_evaluator import SparseIndexing, SparseRetrieval
 from .utils.utils import get_initialize_config
@@ -51,7 +51,18 @@ def retrieve(exp_dict: DictConfig):
     # config["out_dir"] = os.path.join(config["out_dir"], "beir", exp_dict["beir"]["dataset"])
     # os.makedirs(config["out_dir"], exist_ok=True)
 
-    ds_name = exp_dict["beir"]["dataset"]
+
+    ds_name = exp_dict["rusbeir"]["dataset"].strip()
+    qrels_name = ds_name+"-qrels"
+
+    config["index_dir"] = os.path.join(config["index_dir"], "rusbeir", ds_name)
+    os.makedirs(config["index_dir"], exist_ok=True)
+
+    config["out_dir"] = os.path.join(config["out_dir"], "rusbeir", ds_name)
+    os.makedirs(config["out_dir"], exist_ok=True)
+
+
+    ds_name = "kaengreg/rus-scifact"
     qrels_name = ds_name+"-qrels"
 
     try:
@@ -59,19 +70,19 @@ def retrieve(exp_dict: DictConfig):
                                         keep_in_memory=False).load(split='train') 
         
     except Exception as e:
-        print(f"Error loading test split: {e}")
-        
+        print(f"Error loading train split: {e}")
+        exit(1)
 
-    # Provide the data path where dataset has been downloaded and unzipped to the data loader
-    # data folder would contain these files:
-    # (1) datapath/corpus.jsonl  (format: jsonlines)
-    # (2) datapath/queries.jsonl (format: jsonlines)
-    # (3) datapath/qrels/test.tsv (format: tsv ("\t"))
+    
+    # qrels обрабатывать не надо 
+    # corpus и queries необходимо обработать, т.к. они находятся в формате jsonl
 
-    corpus, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="test")
 
-    d_collection = BeirDataset(corpus, information_type="document")
-    q_collection = BeirDataset(queries, information_type="query")
+    return 
+    
+    d_collection = RusBeirDataset(corpus, information_type="document")
+    q_collection = RusBeirDataset(queries, information_type="query")
+
 
     # Index BEIR collection
     d_loader = CollectionDataLoader(dataset=d_collection, tokenizer_type=model_training_config["tokenizer_type"],
