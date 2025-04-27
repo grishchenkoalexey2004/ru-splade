@@ -15,3 +15,6 @@ data/dev_queries
 data/dev_qrel.json
 test.py
 elastic-engine
+analytics/splade-doc-results
+analytics/splade-results
+

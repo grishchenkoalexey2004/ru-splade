@@ -101,7 +101,7 @@ if [ "${DEBUG_SPLADE}" = "0" ]; then
         +config.out_dir=$OUT_DIR \
         config.regularizer.FLOPS.lambda_q=$LAMBDA_Q \
         config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        +config.random_seed=$SEED \
+        +config.random_seed=100 \
         init_dict.model_type_or_dir=$MODEL_NAME \
         config.tokenizer_type=$MODEL_NAME
     exit 0

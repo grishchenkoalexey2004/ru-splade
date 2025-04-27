@@ -2,7 +2,7 @@
 defaults: # (these specify which config FILES to use)
   ############## TRAIN ###################################
   - train/config: ru-splade-max
-  - train/data: ru-splade
+  - train/data: ru-splade-max
   - train/model: ru-splade-max # only model changes, config remains the same!
   ############## INDEX ###################################
   - index: ru-splade
