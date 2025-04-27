@@ -19,7 +19,7 @@ config:
     FLOPS:
       lambda_q: 0.0000 # do not override! 
       lambda_d: 0.0001 # default value! (may be overridden by command line argument)
-      T: 40000
+      T: 25000
       targeted_rep: rep
       reg: FLOPS
 
