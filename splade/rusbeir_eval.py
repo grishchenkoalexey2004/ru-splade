@@ -13,7 +13,7 @@ from tqdm.auto import tqdm
 
 from conf.CONFIG_CHOICE import CONFIG_NAME, CONFIG_PATH
 from .datasets.dataloaders import CollectionDataLoader
-from .datasets.datasets import RusBeirDataset
+from .datasets.datasets import BeirDataset
 from .models.models_utils import get_model
 from .tasks.transformer_evaluator import SparseIndexing, SparseRetrieval
 from .utils.utils import get_initialize_config
@@ -78,10 +78,12 @@ def retrieve(exp_dict: DictConfig):
     # corpus и queries необходимо обработать, т.к. они находятся в формате jsonl
 
 
-    return 
-    
-    d_collection = RusBeirDataset(corpus, information_type="document")
-    q_collection = RusBeirDataset(queries, information_type="query")
+    # query: {"_id": "1", "text": "query", "processed_text": "query"}
+    # corpus: {"_id": "1", "title": "title", "text": "document", "processed_text": "document"}
+
+
+    d_collection = BeirDataset(corpus, information_type="document")
+    q_collection = BeirDataset(queries, information_type="query")
 
 
     # Index BEIR collection
