@@ -75,7 +75,7 @@ if [ "${DEBUG_SPLADE}" = "1" ]; then
         config.record_frequency=3 \
         config.train_batch_size=4 \
         config.eval_batch_size=4 \
-        +config.random_seed=$SEED \
+        +config.random_seed=60 \
         init_dict.model_type_or_dir=$MODEL_NAME \
         config.tokenizer_type=$MODEL_NAME
     exit 0
@@ -88,7 +88,7 @@ if [ "${DEBUG_SPLADE}" = "0" ]; then
         +config.out_dir=$OUT_DIR \
         config.regularizer.FLOPS.lambda_q=0.0000 \
         config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        +config.random_seed=$SEED \
+        +config.random_seed=60 \
         init_dict.model_type_or_dir=$MODEL_NAME \
         config.tokenizer_type=$MODEL_NAME
     exit 0
