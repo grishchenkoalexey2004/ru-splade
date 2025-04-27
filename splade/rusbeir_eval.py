@@ -115,14 +115,23 @@ def retrieve(exp_dict: DictConfig):
                 query_dict[doc_id] = doc_values
         new_run[query_id] = query_dict
     ndcg, map_, recall, p = EvaluateRetrieval.evaluate(qrels, new_run, [1, 10, 100, 1000])
-    results2 = EvaluateRetrieval.evaluate_custom(qrels, new_run, [1, 10, 100, 1000], metric="r_cap")
-    res = {
-        "NDCG@10": ndcg["NDCG@10"],
-        "Recall@100": recall["Recall@100"],
-        "R_cap@100": results2["R_cap@100"]
+
+
+
+    # Create metrics directory if it doesn't 
+    metrics = {
+        'ndcg': ndcg,
+        'map': map_,
+        'recall': recall,
+        'precision': p
     }
-    print(res)
-    json.dump(res, open(os.path.join(config.out_dir, "perf.json"), "w"))
+    json.dump(metrics, open(os.path.join(config.out_dir, "perf.json"), "w"))
+
+    print(f"Metrics saved to {config.out_dir}/perf.json")
+    print(f"Metrics: {metrics}")
+
+    
+
 
 
 if __name__ == "__main__":
