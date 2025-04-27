@@ -66,7 +66,7 @@ def retrieve(exp_dict: DictConfig):
 
     try:
         corpus, queries, qrels = HFDataLoader(hf_repo=ds_name, hf_repo_qrels=qrels_name, streaming=False,
-                                        keep_in_memory=False).load() 
+                                        keep_in_memory=False,text_type='text').load() 
         
     except Exception as e:
         print(f"Error loading train split: {e}")
