@@ -72,10 +72,10 @@ def retrieve(exp_dict: DictConfig):
     except:
         try:
             corpus, queries, qrels = HFDataLoader(hf_repo=ds_name, hf_repo_qrels=qrels_name, streaming=False,
-                                        keep_in_memory=False).load(split='dev') # select necessary split train/test/dev
+                                        keep_in_memory=False,text_type='text').load(split='dev') # select necessary split train/test/dev
         except:
             corpus, queries, qrels = HFDataLoader(hf_repo=ds_name, hf_repo_qrels=qrels_name, streaming=False,
-                                        keep_in_memory=False).load(split='train') # select necessary split train/test/dev
+                                        keep_in_memory=False,text_type='text').load(split='train') # select necessary split train/test/dev
 
     
     # qrels обрабатывать не надо 
