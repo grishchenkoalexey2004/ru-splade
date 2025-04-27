@@ -62,7 +62,6 @@ def retrieve(exp_dict: DictConfig):
     os.makedirs(config["out_dir"], exist_ok=True)
 
 
-    ds_name = "kaengreg/rus-scifact"
     qrels_name = ds_name+"-qrels"
 
     try:
