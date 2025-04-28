@@ -1,5 +1,4 @@
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
   
 # Get lambda_d value from command line argument
 if [ -z "$1" ]; then
@@ -33,11 +32,31 @@ else
     MODEL_NAME="ai-forever/ruBert-base"
 fi
 
-CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/checkpoint
-INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/index
-OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
 
+if [ -z "$3" ]; then
+    echo "Error: model variant parameter is required"
+    echo "Usage: $0 <lambda_d> <model_type> <variant>"
+    echo "Example: $0 0.0001 vk normal"
+    echo "         $0 0.0001 ai-forever distil"
+    exit 1
+fi
 
+if [ "$3" != "normal" ] && [ "$3" != "distil" ]; then
+    echo "Error: model variant must be either 'normal' or 'distil'"
+    exit 1
+fi
+
+if [ "$3" = "normal" ]; then
+    export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
+    CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/checkpoint
+    INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/index
+    OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
+elif [ "$3" = "distil" ]; then
+    export SPLADE_CONFIG_NAME="ru-splade-doc_distil.yaml" 
+    CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}_distil/checkpoint
+    INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}_distil/index
+    OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}_distil/out
+fi
 
 DATASETS=("kaengreg/rus-scifact" "kaengreg/rubq" "kaengreg/rus-arguana" "kaengreg/rus-nfcorpus" "kaengreg/rus-tydiqa" "kaengreg/rus-xquad")
 
