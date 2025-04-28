@@ -73,6 +73,8 @@ class SiameseBase(torch.nn.Module, ABC):
         if freeze_d_model:
             self.transformer_rep.requires_grad_(False)
 
+        print("Model type or dir: ", model_type_or_dir)
+
     def encode(self, kwargs, is_q):
         raise NotImplementedError
 

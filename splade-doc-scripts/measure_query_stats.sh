@@ -1,5 +1,3 @@
-# usage: bash evaluate_splade-doc.sh <lambda_d> <model_type>
-
 
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
@@ -39,26 +37,11 @@ CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/checkpoint
 INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/index
 OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
 
-
-# Generate random seed between 0-1000000
-SEED=$((RANDOM % 1000))
-
-# Check if checkpoint directory exists
-if [ ! -d "$CHECKPOINT_DIR" ]; then
-    echo "Error: Checkpoint directory does not exist: $CHECKPOINT_DIR"
-    echo "Please train the model first using train_ru-splade-doc.sh"
-    exit 1
-fi
-
-python -m splade.index \
-    +config.checkpoint_dir=$CHECKPOINT_DIR \
-    +config.index_dir=$INDEX_DIR \
-    +config.out_dir=$OUT_DIR \
-    config.regularizer.FLOPS.lambda_q=0.0000 \
-    config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-    +config.random_seed=$SEED \
-    init_dict.model_type_or_dir=$MODEL_NAME \
-    config.tokenizer_type=$MODEL_NAME
-
-
-exit 0
+python -m splade.measure_query_stats \
+        +config.checkpoint_dir=$CHECKPOINT_DIR \
+        +config.index_dir=$INDEX_DIR \
+        +config.out_dir=$OUT_DIR \
+        config.regularizer.FLOPS.lambda_q=0.0000 \
+        config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
+        init_dict.model_type_or_dir=$MODEL_NAME \
+        config.tokenizer_type=$MODEL_NAME
