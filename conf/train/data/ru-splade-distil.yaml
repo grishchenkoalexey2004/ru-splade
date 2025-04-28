@@ -1,3 +1,4 @@
+# @package data
 type: triplets
 
 TRAIN_DATA_DIR: data/hard-triplets
