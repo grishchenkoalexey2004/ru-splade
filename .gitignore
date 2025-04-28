@@ -17,4 +17,5 @@ test.py
 elastic-engine
 analytics/splade-doc-results
 analytics/splade-results
-
+analytics/splade-max-results
+analytics/tensorboards
