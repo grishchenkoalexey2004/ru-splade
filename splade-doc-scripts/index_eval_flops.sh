@@ -28,6 +28,12 @@ fi
 
 MODEL_TYPE=$2
 
+if [ "$MODEL_TYPE" = "vk" ]; then
+    MODEL_NAME="deepvk/RuModernBERT-base"
+else
+    MODEL_NAME="ai-forever/ruBert-base"
+fi
+
 if [ -z "$3" ]; then
     echo "Error: model variant parameter is required"
     echo "Usage: $0 <lambda_d> <model_type> <variant>"
