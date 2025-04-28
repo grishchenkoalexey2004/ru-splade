@@ -1,5 +1,4 @@
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
   
 # Get lambda_d value from command line argument
 if [ -z "$1" ]; then
@@ -41,45 +40,34 @@ if [ -z "$3" ]; then
 fi
 
 
-# Set DEBUG_SPLADE based on mode argument
-if [ "$3" = "debug" ]; then
-    export DEBUG_SPLADE=1
-    # Remove experiments folder if it exists
-    CHECKPOINT_DIR=experiments/debug_${MODEL_TYPE}_${LAMBDA_D}/checkpoint
-    INDEX_DIR=experiments/debug_${MODEL_TYPE}_${LAMBDA_D}/index
-    OUT_DIR=experiments/debug_${MODEL_TYPE}_${LAMBDA_D}/out
-elif [ "$3" = "run" ]; then
-    export DEBUG_SPLADE=0
-    CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/checkpoint
-    INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/index
-    OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
-else
-    echo "Error: Invalid mode. Must be 'run' or 'debug'"
+if [ -z "$3" ]; then
+    echo "Error: model variant parameter is required"
+    echo "Usage: $0 <lambda_d> <model_type> <variant>"
+    echo "Example: $0 0.0001 vk normal"
+    echo "         $0 0.0001 ai-forever distil"
     exit 1
 fi
 
-
-# Generate random seed between 0-1000000
-SEED=$((RANDOM % 1000))
-
-
-if [ "${DEBUG_SPLADE}" = "1" ]; then
-    python -m splade.train \
-        +config.checkpoint_dir=$CHECKPOINT_DIR \
-        +config.index_dir=$INDEX_DIR \
-        +config.out_dir=$OUT_DIR \
-        config.regularizer.FLOPS.lambda_q=0.0000 \
-        config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        data.VALIDATION_SIZE_FOR_LOSS=10 \
-        config.nb_iterations=10 \
-        config.record_frequency=3 \
-        config.train_batch_size=4 \
-        config.eval_batch_size=4 \
-        +config.random_seed=917 \
-        init_dict.model_type_or_dir=$MODEL_NAME \
-        config.tokenizer_type=$MODEL_NAME
-    exit 0
+if [ "$3" != "normal" ] && [ "$3" != "distil" ]; then
+    echo "Error: model variant must be either 'normal' or 'distil'"
+    exit 1
 fi
+
+if [ "$3" = "normal" ]; then
+    export SPLADE_CONFIG_NAME="ru-splade-doc.yaml" 
+    CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/checkpoint
+    INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/index
+    OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}/out
+elif [ "$3" = "distil" ]; then
+    export SPLADE_CONFIG_NAME="ru-splade-doc_distil.yaml" 
+    CHECKPOINT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}_distil/checkpoint
+    INDEX_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}_distil/index
+    OUT_DIR=models/${MODEL_TYPE}_ru-splade-doc_${LAMBDA_D}_distil/out
+fi
+
+
+
+
 
 if [ "${DEBUG_SPLADE}" = "0" ]; then
     python -m splade.train \
@@ -88,7 +76,7 @@ if [ "${DEBUG_SPLADE}" = "0" ]; then
         +config.out_dir=$OUT_DIR \
         config.regularizer.FLOPS.lambda_q=0.0000 \
         config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
-        +config.random_seed=917 \
+        +config.random_seed=100 \
         init_dict.model_type_or_dir=$MODEL_NAME \
         config.tokenizer_type=$MODEL_NAME
     exit 0

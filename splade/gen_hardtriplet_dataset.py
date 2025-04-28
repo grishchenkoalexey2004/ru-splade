@@ -31,7 +31,7 @@ with open(result_file, 'w', encoding='utf-8') as f_out:
     with open(triplet_ids_dir, 'r', encoding='utf-8') as f:
         for line in tqdm(f, total=NUM_TRIPLETS):
             qid, pos_did, neg_did = line.strip().split('\t')
-            result_line = f"{qid}\t{queries[qid]}\t{documents[pos_did]}\t{documents[neg_did]}\n"
+            result_line = f"{queries[qid]}\t{documents[pos_did]}\t{documents[neg_did]}\n"
             f_out.write(result_line)
 
 

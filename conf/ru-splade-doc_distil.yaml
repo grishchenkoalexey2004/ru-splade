@@ -1,0 +1,26 @@
+# FILES
+defaults: # (these specify which config FILES to use)
+  ############## TRAIN ###################################
+  - train/config: ru-splade-doc
+  - train/data: ru-splade-distil
+  - train/model: ru-splade-doc
+  ############## INDEX ###################################
+  - index: ru-splade
+  ############## RETRIEVE ################################
+  - retrieve_evaluate: ru-splade
+  ############### FLOPS ##################################
+  - flops: ru-splade
+
+# Direct PARAMETER setting
+config:
+  loss: InBatchPairwiseNLL
+  augment_pair: in_batch_negatives
+  regularizer:
+    FLOPS:
+      lambda_q: 0.0000 # do not override! 
+      lambda_d: 0.0001 # default value! (may be overridden by command line argument)
+      T: 25000
+      targeted_rep: rep
+      reg: FLOPS
+
+

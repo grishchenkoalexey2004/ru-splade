@@ -1,0 +1,4 @@
+type: triplets
+
+TRAIN_DATA_DIR: data/hard-triplets
+VALIDATION_SIZE_FOR_LOSS: 10000
