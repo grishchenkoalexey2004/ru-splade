@@ -79,7 +79,7 @@ python -m splade.retrieve \
     +config.checkpoint_dir=$CHECKPOINT_DIR \
     +config.index_dir=$INDEX_DIR \
     +config.out_dir=$OUT_DIR \
-    config.regularizer.FLOPS.lambda_q=$LAMBDA_Q \
+    config.regularizer.FLOPS.lambda_q=0.0000 \
     config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
     init_dict.model_type_or_dir=$MODEL_NAME \
     config.tokenizer_type=$MODEL_NAME
@@ -93,7 +93,7 @@ python -m splade.flops \
     +config.checkpoint_dir=$CHECKPOINT_DIR \
     +config.index_dir=$INDEX_DIR \
     +config.out_dir=$OUT_DIR \
-    config.regularizer.FLOPS.lambda_q=$LAMBDA_Q \
+    config.regularizer.FLOPS.lambda_q=0.0000 \
     config.regularizer.FLOPS.lambda_d=$LAMBDA_D \
     init_dict.model_type_or_dir=$MODEL_NAME \
     config.tokenizer_type=$MODEL_NAME
