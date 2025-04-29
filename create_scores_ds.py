@@ -86,11 +86,12 @@ with open(result_file, 'w', encoding='utf-8') as f_out:
             qid, pos_did, neg_did = map(int, line.strip().split('\t'))
             pos_doc = documents[str(pos_did)]
             neg_doc = documents[str(neg_did)]
-            
+            query_doc = queries[str(qid)]
+
             if str(qid) in qrels and qid in scores_dict:
                 s_pos = scores_dict[qid][pos_did]
                 s_neg = scores_dict[qid][neg_did]
                 
-                f_out.write(f"{qid}\t{pos_doc}\t{neg_doc}\t{s_pos}\t{s_neg}\n")
+                f_out.write(f"{query_doc}\t{pos_doc}\t{neg_doc}\t{s_pos}\t{s_neg}\n")
 
 
