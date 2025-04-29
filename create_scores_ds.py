@@ -84,13 +84,13 @@ with open(result_file, 'w', encoding='utf-8') as f_out:
     with open(triplet_ids_dir, 'r', encoding='utf-8') as f_in:
         for i, line in enumerate(tqdm(f_in)):
             qid, pos_did, neg_did = map(int, line.strip().split('\t'))
-            pos_doc = documents[pos_did]
-            neg_doc = documents[neg_did]
+            pos_doc = documents[str(pos_did)]
+            neg_doc = documents[str(neg_did)]
+            
             if str(qid) in qrels and qid in scores_dict:
                 s_pos = scores_dict[qid][pos_did]
                 s_neg = scores_dict[qid][neg_did]
                 
-                print(s_pos,s_neg)
                 f_out.write(f"{qid}\t{pos_doc}\t{neg_doc}\t{s_pos}\t{s_neg}\n")
 
 

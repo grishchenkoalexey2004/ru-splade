@@ -1,7 +1,7 @@
 # FILES
 defaults: # (these specify which config FILES to use)
   ############## TRAIN ###################################
-  - train/config: ru-splade-distil
+  - train/config: ru-splade-doc_distil
   - train/data: ru-splade-distil
   - train/model: ru-splade-doc
   ############## INDEX ###################################
@@ -23,29 +23,3 @@ config:
       targeted_rep: rep
       reg: FLOPS
 
-
-# defaults: # (these specify which config FILES to use)
-#   ############## TRAIN ###################################
-#   - train/config: splade
-#   - train/data: distil_from_ensemble
-#   - train/model: splade_cocondenser
-#   ############## INDEX ###################################
-#   - index: msmarco
-#   ############## RETRIEVE ################################
-#   - retrieve_evaluate: all
-#   ############### FLOPS ##################################
-#   - flops: msmarco
-
-# # Direct PARAMETER setting
-# config:
-#   loss: DistilMarginMSE
-#   regularizer:
-#     FLOPS:
-#       lambda_q: 0.5
-#       lambda_d: 0.4
-#       T: 50000
-#       targeted_rep: rep
-#       reg: FLOPS
-#   checkpoint_dir: models/cocondenser_ensemble_distil/checkpoint
-#   index_dir: models/cocondenser_ensemble_distil/index
-#   out_dir: models/cocondenser_ensemble_distil/out
