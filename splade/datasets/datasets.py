@@ -62,7 +62,7 @@ class DistilPairsDatasetPreLoad(Dataset):
         self.deleted_count = 0
         self.index = 0
         with open(self.data_dir) as reader:
-            for line in enumerate(tqdm(reader)):
+            for line in tqdm(reader):
                 if len(line) > 1:
                     q, d_pos, d_neg, s_pos, s_neg = line.split("\t")
                     if "Â" in q or "Â" in d_pos or "Â" in d_neg: 
@@ -73,7 +73,7 @@ class DistilPairsDatasetPreLoad(Dataset):
                         self.index += 1
         
         self.nb_ex = len(self.data_dict)
-        
+
         print(f"Удалено дефектных триплетов: {self.deleted_count}")
         print(f"Загружено триплетов: {self.nb_ex}")
         
