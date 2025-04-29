@@ -15,4 +15,4 @@ warmup_steps: 6000
 max_length: 256
 fp16: true
 matching_type: splade_doc
-monitoring_ckpt: MRR@10  # если хотим MRR@10, то нужна валидационная выборка!
+monitoring_ckpt: MRR@10  
