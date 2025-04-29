@@ -1,6 +1,7 @@
 # @package data
 
 type: hard_negatives
+
 TRAIN:
   DATASET_PATH: data/toy_data/scores/toy.pkl.gz
   D_COLLECTION_PATH: data/toy_data/val_collection

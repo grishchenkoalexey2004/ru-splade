@@ -162,6 +162,7 @@ class MsMarcoHardNegatives(Dataset):
         with open(qrels_path) as reader:
             self.qrels = json.load(reader)
         self.query_list = list()
+        # добавляет все запросы, которые есть в pkl
         for query in query_list:
             if str(query) in self.qrels.keys():
                 self.query_list.append(query)
@@ -170,21 +171,29 @@ class MsMarcoHardNegatives(Dataset):
     def __len__(self):
         return len(self.query_list)
 
+    # короче возвращает триплеты (query, doc_pos, doc_neg, score_pos, score_neg)
     def __getitem__(self, idx):
         query = self.query_list[idx]
         q = self.query_dataset[str(query)][1]
         candidates_dict = self.scores_dict[query]
         candidates = list(candidates_dict.keys())
+        # positives - список id документов реально релевантных запросу
         positives = list(self.qrels[str(query)].keys())
+        # удаляем из списка кандидатов документы, которые действительно релевантны запросу (остаются negatives)
         for positive in positives:
             candidates.remove(int(positive))
+        # выбираем рандомный документ из списка положительных и вычисляем его score
         positive = random.sample(positives, 1)[0]
         s_pos = candidates_dict[int(positive)]
+        # в списке candidates остались только отрицательные документы (берем случайный и генерируем его score)
         negative = random.sample(candidates, 1)[0]
         s_neg = candidates_dict[negative]
+        # получаем документы
         d_pos = self.document_dataset[positive][1]
         d_neg = self.document_dataset[str(negative)][1]
+        # возвращаем пятерку (query, positive_doc, negative_doc, positive_score, negative_score)
         return q.strip(), d_pos.strip(), d_neg.strip(), float(s_pos), float(s_neg)
+
 
 
 class IR_Dataset(Dataset):

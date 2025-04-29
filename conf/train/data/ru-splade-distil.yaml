@@ -1,5 +1,17 @@
 # @package data
-type: triplets
 
-TRAIN_DATA_DIR: data/hard-triplets
-VALIDATION_SIZE_FOR_LOSS: 10000
+type: hard_negatives
+
+# TRAIN_DATA_DIR: data/hard-triplets
+# VALIDATION_SIZE_FOR_LOSS: 10000
+# VALIDATION_FULL_RANKING:
+#   D_COLLECTION_PATH: data/val_retrieval/collection
+#   Q_COLLECTION_PATH: data/val_retrieval/queries
+#   QREL_PATH: data/dev_qrel.json
+#   TOP_K: 500
+
+TRAIN:
+  DATASET_PATH: data/toy_data/scores/toy.pkl.gz
+  D_COLLECTION_PATH: data/toy_data/val_collection
+  Q_COLLECTION_PATH: data/toy_data/val_queries
+  QREL_PATH: data/dev_qrel.json
