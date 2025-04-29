@@ -59,13 +59,24 @@ class DistilPairsDatasetPreLoad(Dataset):
         self.data_dict = {}  # => dict that maps the id to the line offset (position of pointer in the file)
         print("Preloading dataset")
         self.data_dir = os.path.join(self.data_dir, "raw.tsv")
+        self.deleted_count = 0
+        self.index = 0
         with open(self.data_dir) as reader:
-            for i, line in enumerate(tqdm(reader)):
+            for line in enumerate(tqdm(reader)):
                 if len(line) > 1:
                     q, d_pos, d_neg, s_pos, s_neg = line.split("\t")
-                    self.data_dict[i] = (
-                        q.strip(), d_pos.strip(), d_neg.strip(), float(s_pos.strip()), float(s_neg.strip()))
+                    if "Â" in q or "Â" in d_pos or "Â" in d_neg: 
+                        self.deleted_count += 1
+                    else:
+                        self.data_dict[self.index] = (
+                            q.strip(), d_pos.strip(), d_neg.strip(), float(s_pos.strip()), float(s_neg.strip()))
+                        self.index += 1
+        
         self.nb_ex = len(self.data_dict)
+        
+        print(f"Удалено дефектных триплетов: {self.deleted_count}")
+        print(f"Загружено триплетов: {self.nb_ex}")
+        
 
     def __len__(self):
         return self.nb_ex
